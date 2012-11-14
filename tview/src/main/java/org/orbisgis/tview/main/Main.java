@@ -28,11 +28,13 @@
  */
 package org.orbisgis.tview.main;
 
+import java.io.File;
 import java.io.InputStream;
 import javax.swing.SwingUtilities;
 import org.orbisgis.core.context.main.MainContext;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.layerModel.OwsMapContext;
+import org.orbisgis.core.workspace.CoreWorkspace;
 
 /**
  * Entry point for testing tview project.
@@ -59,8 +61,11 @@ final class Main
     */
     public static void main( String[] args ) throws Exception
     {
-        MainContext mainContext = new MainContext(false);
-        
+        MainContext.initConsoleLogger(true);
+        CoreWorkspace workspace = new CoreWorkspace();
+        File workspaceFolder = new File(System.getProperty("user.home"),"OrbisGIS_MT"+File.separator);
+        workspace.setWorkspaceFolder(workspaceFolder.getAbsolutePath());
+        MainContext mainContext = new MainContext(true,workspace,true);
         final MainFrame frame = new MainFrame();
         final MapContext mapContext = getSampleMapContext();
         

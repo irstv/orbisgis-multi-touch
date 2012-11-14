@@ -37,32 +37,48 @@ import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.map.MapTransform;
 import org.orbisgis.progress.NullProgressMonitor;
 
 /**
- * 
+ * Sample of a component that draw a map context
  */
 public class MainFrame extends JFrame {
         private static final Rectangle MAIN_VIEW_POSITION_AND_SIZE = new Rectangle(20,20,800,600);/*!< Bounds of mainView, x,y and width height*/
+        private JLabel label = new JLabel();
+        private MapContext mapContext;
+        private MapTransform mapTransform;
         /**
          * Load the map context and render into a Buffered Image
          */
         public void init(MapContext mapContext) {
+             this.mapContext = mapContext;
              // Initialise the Renderer           
-             MapTransform mapTransform = new MapTransform();
+             mapTransform = new MapTransform();
              initMapTransform(mapTransform, MAIN_VIEW_POSITION_AND_SIZE.width,
                      MAIN_VIEW_POSITION_AND_SIZE.height);
              mapTransform.setExtent(mapContext.getBoundingBox());
-             // Draw the root layer with the map context envelope
-             mapContext.draw(mapTransform, new NullProgressMonitor());
              // Put the buffered image into a JLabel
-             getContentPane().add(new JLabel(new ImageIcon(mapTransform.getImage())));
-             
+             getContentPane().add(label);             
              // Set the state of this JFrame
              setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
              setBounds(MAIN_VIEW_POSITION_AND_SIZE);
+             SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                     draw();
+                }
+            });
+        }
+        /**
+         * Draw the map context
+         */
+        public void draw() {
+                // Draw the root layer with the map context envelope
+                mapContext.draw(mapTransform, new NullProgressMonitor());
+                label.setIcon(new ImageIcon(mapTransform.getImage()));
         }
         /**
          * Initialise a MapTransform, by providing a new buffered image
@@ -78,12 +94,6 @@ public class MainFrame extends JFrame {
                 BufferedImage inProcessImage = configuration
                                 .createCompatibleImage(width, height,
                                                 BufferedImage.TYPE_INT_ARGB);
-
-                Graphics gImg = inProcessImage.createGraphics();
-
-                // filling image
-                gImg.setColor(Color.WHITE);
-                gImg.fillRect(0, 0, width, height);
 
                 // this is the new image
                 // mapTransform will update the AffineTransform
