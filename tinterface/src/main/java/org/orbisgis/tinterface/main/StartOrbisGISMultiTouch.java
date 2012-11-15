@@ -1,3 +1,5 @@
+package tinterface.src.main.java.org.orbisgis.tinterface.main;
+
 import org.mt4j.MTApplication;
 
 /**

@@ -1,3 +1,5 @@
+package tinterface.src.main.java.org.orbisgis.tinterface.main;
+
 import org.mt4j.MTApplication;
 import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
@@ -24,12 +26,25 @@ public class MainScene extends AbstractScene {
 	/** The map */
 	private TestInteractiveMap map;
 
+	public TestInteractiveMap getMap() {
+		return map;
+	}
+	public void setMap(TestInteractiveMap map) {
+		this.map = map;
+	}
+	
 	/** The layer list */
-	// private LayerList layerList;
-
+	private LayerList layerList;
+	
 	/** The temporal line */
 	// private TemporalLine temporalLine;
 
+	public LayerList getLayerList() {
+		return layerList;
+	}
+	public void setLayerList(LayerList layerList) {
+		this.layerList = layerList;
+	}
 	/**
 	 * Constructor of MainScene
 	 * 
@@ -48,10 +63,9 @@ public class MainScene extends AbstractScene {
 		// configuration file) and add it to the scene
 		map = new TestInteractiveMap(mtApplication);
 		this.getCanvas().addChild(map);
-
-		// Instantiate a new layer list and add it the the scene
-		// layerList = new LayerList();
-		// this.getCanvas().addChild(layerList);
+		
+		// Instantiate the list of Layers
+		setLayerList(new LayerList(this, mtApplication));
 
 		// Instantiate a new temporal line and add it to the scene
 		// temporalLine = new TemporalLine();
