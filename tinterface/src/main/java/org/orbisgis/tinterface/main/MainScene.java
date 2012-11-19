@@ -5,14 +5,11 @@ import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragProcessor;
-import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleProcessor;
 import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldProcessor;
 import org.mt4j.input.inputProcessors.globalProcessors.CursorTracer;
 import org.mt4j.sceneManagement.AbstractScene;
-
-import com.modestmaps.TestInteractiveMap;
-import quicktime.qd3d.math.Vector3D;
+import org.mt4j.util.math.Vector3D;
 
 /**
  * This class create the main scene from the application. The map, the layer
@@ -26,13 +23,13 @@ public class MainScene extends AbstractScene {
         /**
          * The map
          */
-        private TestInteractiveMap map;
+        private Map map;
 
-        public TestInteractiveMap getMap() {
+        public Map getMap() {
                 return map;
         }
 
-        public void setMap(TestInteractiveMap map) {
+        public void setMap(Map map) {
                 this.map = map;
         }
         /**
@@ -57,6 +54,7 @@ public class MainScene extends AbstractScene {
          *
          * @param mtApplication the application
          * @param name the name of the scene
+         * @throws Exception 
          */
         public MainScene(MTApplication mtApplication, String name) {
                 super(mtApplication, name);
@@ -66,8 +64,12 @@ public class MainScene extends AbstractScene {
 
                 // Instantiate a new map with the default configuration (specify in a
                 // configuration file) and add it to the scene
-                map = new TestInteractiveMap(mtApplication);
-                this.getCanvas().addChild(map);
+                try {
+					setMap(new Map(mtApplication, this));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
                 // Instantiate the list of Layers
                 setLayerList(new LayerList(this, mtApplication));
@@ -127,9 +129,6 @@ public class MainScene extends AbstractScene {
                  */
                 public boolean processGestureEvent(MTGestureEvent gesture) {
                         // Scale the map
-                        float scaleX = ((ScaleEvent) gesture).getScaleFactorX();
-                        map.sc *= scaleX;
-
                         return false;
                 }
         }

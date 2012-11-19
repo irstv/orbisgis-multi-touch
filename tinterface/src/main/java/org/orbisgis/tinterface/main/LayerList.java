@@ -19,16 +19,12 @@ import org.mt4j.util.font.FontManager;
 import org.mt4j.util.font.IFont;
 import org.mt4j.util.math.Vector3D;
 
-import com.modestmaps.TestInteractiveMap;
-import com.modestmaps.providers.AbstractMapProvider;
-import com.modestmaps.providers.Microsoft;
-
 public class LayerList extends MTList {
 
         /**
          * The map
          */
-        protected TestInteractiveMap m;
+        protected Map m;
 
         /**
          * Constructor of the list
@@ -62,7 +58,7 @@ public class LayerList extends MTList {
                 mapMenu.addChild(this);
 
                 for (int i = 0; i < 20; i++) {
-                        this.addListElement(this.createListCell("Element" + i, font, new Microsoft.AerialProvider(), cellWidth, cellHeight, cellFillColor, cellPressedFillColor, mtApplication));
+                        this.addListElement(this.createListCell("Element" + i, font, cellWidth, cellHeight, cellFillColor, cellPressedFillColor, mtApplication));
                 }
 
                 // Slide out animation
@@ -119,7 +115,7 @@ public class LayerList extends MTList {
         private boolean doSlideIn = false;
 
         //  Has to be modified by paulo : Have to create an draggable Element with a picture and a label
-        private MTListCell createListCell(final String label, IFont font, final AbstractMapProvider mapProvider, float cellWidth, float cellHeight, final MTColor cellFillColor, final MTColor cellPressedFillColor, MTApplication mtApplication) {
+        private MTListCell createListCell(final String label, IFont font, float cellWidth, float cellHeight, final MTColor cellFillColor, final MTColor cellPressedFillColor, MTApplication mtApplication) {
                 final MTListCell cell = new MTListCell(mtApplication, cellWidth, cellHeight);
 
                 cell.setChildClip(null); //FIXME TEST, no clipping for performance!
@@ -159,7 +155,6 @@ public class LayerList extends MTList {
                                         case TapEvent.TAPPED:
 //						System.out.println("Button clicked: " + label);
                                                 cell.setFillColor(cellFillColor);
-                                                m.setMapProvider(mapProvider);
                                                 break;
                                 }
                                 return false;
