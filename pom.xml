@@ -13,6 +13,7 @@
         <url>http://www.orbisgis.org</url>
         <modules>
                 <module>tview</module>
+                <module>tinterface</module>
         </modules>
         <properties>
                 <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
