@@ -26,10 +26,8 @@
  * or contact directly:
  * info_at_ orbisgis.org
  */
-package org.orbisgis.tview.main;
+package org.orbisgis.tinterface.main;
 
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;

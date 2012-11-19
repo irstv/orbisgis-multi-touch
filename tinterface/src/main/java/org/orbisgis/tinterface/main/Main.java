@@ -26,7 +26,7 @@
  * or contact directly:
  * info_at_ orbisgis.org
  */
-package org.orbisgis.tview.main;
+package org.orbisgis.tinterface.main;
 
 import java.io.File;
 import java.io.InputStream;
