@@ -37,45 +37,44 @@ import org.orbisgis.core.layerModel.OwsMapContext;
 import org.orbisgis.core.workspace.CoreWorkspace;
 
 /**
- * Entry point for testing tview project.
- * tview must be used by the orbisgis-mtouch or orbisgis-view
+ * Entry point for testing tview project. tview must be used by the
+ * orbisgis-mtouch or orbisgis-view
  */
-final class Main 
-{
-    /**
-     * Utility class
-     */
-    private Main() {
-        
-    }
-    
-    private static MapContext getSampleMapContext()  throws Exception {
-        MapContext mapContext = new OwsMapContext();
-        InputStream fileContent = Main.class.getResourceAsStream("Iris.ows");
-        mapContext.read(fileContent);
-        mapContext.open(null);
-        return mapContext;        
-    }
-    /**
-    * First function call
-    */
-    public static void main( String[] args ) throws Exception
-    {
-        MainContext.initConsoleLogger(true);
-        CoreWorkspace workspace = new CoreWorkspace();
-        File workspaceFolder = new File(System.getProperty("user.home"),"OrbisGIS_MT"+File.separator);
-        workspace.setWorkspaceFolder(workspaceFolder.getAbsolutePath());
-        MainContext mainContext = new MainContext(true,workspace,true);
-        final MainFrame frame = new MainFrame();
-        final MapContext mapContext = getSampleMapContext();
-        
-        SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                            // Load the sample map context
-                            frame.init(mapContext);
-                            frame.setVisible(true);
-                    }
-            });
-    }
+final class Main {
+
+        /**
+         * Utility class
+         */
+        private Main() {
+        }
+
+        private static MapContext getSampleMapContext() throws Exception {
+                MapContext mapContext = new OwsMapContext();
+                InputStream fileContent = Main.class.getResourceAsStream("Iris.ows");
+                mapContext.read(fileContent);
+                mapContext.open(null);
+                return mapContext;
+        }
+
+        /**
+         * First function call
+         */
+        public static void main(String[] args) throws Exception {
+                MainContext.initConsoleLogger(true);
+                CoreWorkspace workspace = new CoreWorkspace();
+                File workspaceFolder = new File(System.getProperty("user.home"), "OrbisGIS_MT" + File.separator);
+                workspace.setWorkspaceFolder(workspaceFolder.getAbsolutePath());
+                MainContext mainContext = new MainContext(true, workspace, true);
+                final MainFrame frame = new MainFrame();
+                final MapContext mapContext = getSampleMapContext();
+
+                SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                                // Load the sample map context
+                                frame.init(mapContext);
+                                frame.setVisible(true);
+                        }
+                });
+        }
 }
