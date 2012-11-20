@@ -14,6 +14,7 @@ import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.layerModel.OwsMapContext;
 import org.orbisgis.core.workspace.CoreWorkspace;
+import org.orbisgis.progress.NullProgressMonitor;
 
 import processing.core.PGraphics;
 import processing.core.PImage;
@@ -39,6 +40,8 @@ public class Map extends MTRectangle {
 		final MainFrame frame = new MainFrame();
 		final MapContext mapContext = getSampleMapContext();
 		frame.init(mapContext);
+        mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+
 
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
