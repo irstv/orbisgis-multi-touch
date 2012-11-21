@@ -8,6 +8,9 @@ import org.mt4j.components.visibleComponents.widgets.MTListCell;
 import org.mt4j.components.visibleComponents.widgets.MTTextArea;
 import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
+import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragEvent;
+import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragProcessor;
+import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldProcessor;
 import org.mt4j.input.inputProcessors.componentProcessors.tapProcessor.TapEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.tapProcessor.TapProcessor;
 import org.mt4j.util.MTColor;
@@ -42,7 +45,7 @@ public class LayerList extends MTList{
 		mapMenu.setFillColor(new MTColor(45,45,45,180));
 		mapMenu.setStrokeColor(new MTColor(45,45,45,180));
 		mapMenu.setPositionGlobal(new Vector3D(mtApplication.width/2f, mtApplication.height/2f));
-		mapMenu.translateGlobal(new Vector3D(-mtApplication.width/2f - 80,-10)); // Initializations position of the menu
+		mapMenu.translateGlobal(new Vector3D(-mtApplication.width/2f - 80,10)); // Initializations position of the menu
 		mainScene.getCanvas().addChild(mapMenu);
 		
 		float cellWidth = 155, cellHeight = 90; 
@@ -58,7 +61,7 @@ public class LayerList extends MTList{
 		this.setPositionRelativeToParent(mapMenu.getCenterPointLocal());
 		mapMenu.addChild(this);
 		
-		for(int i=0;i<20;i++)
+		for(int i=0;i<15;i++)
 			this.addListElement(this.createListCell("Element"+i, font, new Microsoft.AerialProvider(), cellWidth, cellHeight, cellFillColor, cellPressedFillColor, mtApplication));
 		
 		// Slide out animation
@@ -123,13 +126,6 @@ public class LayerList extends MTList{
 		cell.setChildClip(null); //FIXME TEST, no clipping for performance!
 		
 		cell.setFillColor(cellFillColor);
-		
-		// To get an image that is at a path
-		/* String path ="map.PNG";
-		MTImage imageCell;
-		imageCell.setTexture(path);
-		imageCell.getImage();
-		cell.addChild((MTComponent) imageCell);*/
 		cell.addChild(new MTRectangle(mtApplication, 50,10,50,50));
 				
 		MTTextArea listLabel = new MTTextArea(mtApplication, font);
@@ -142,6 +138,7 @@ public class LayerList extends MTList{
 		listLabel.setPositionRelativeToParent(positionText);
 		cell.unregisterAllInputProcessors();
 		cell.registerInputProcessor(new TapProcessor(mtApplication, 15));
+		cell.registerInputProcessor(new TapAndHoldProcessor(mtApplication));
 		
 		// (Drag & drop = not change provider but AddLayer, tap to remove Layer)
 		cell.addGestureListener(TapProcessor.class, new IGestureEventListener() {
@@ -157,12 +154,41 @@ public class LayerList extends MTList{
 				case TapEvent.TAPPED:
 //						System.out.println("Button clicked: " + label);
 					cell.setFillColor(cellFillColor);
-					m.setMapProvider(mapProvider);
+					//m.setMapProvider(mapProvider);
 					break;
 				}
 				return false;
 			}
 		});
+				
+		cell.registerInputProcessor(new DragProcessor(cell.getRenderer()));
+		cell.addGestureListener(DragProcessor.class, new IGestureEventListener() {
+			public boolean processGestureEvent(MTGestureEvent ge) {
+				DragEvent te = (DragEvent)ge;
+				
+				switch (te.getId()) { 
+				case DragEvent.GESTURE_STARTED:
+					cell.setPickable(true);
+					cell.setFillColor(cellPressedFillColor);
+					break;
+				case DragEvent.GESTURE_UPDATED:
+					Vector3D translationVector = new Vector3D(te.getTranslationVect());
+					translationVector.y=0;
+					cell.translate(translationVector);
+					break;
+				case DragEvent.GESTURE_ENDED:
+					cell.setFillColor(cellFillColor);
+					Vector3D translationVectorInv = new Vector3D(cell.getCenterPointGlobal());
+					translationVectorInv.x = -translationVectorInv.x+93;
+					translationVectorInv.y = 0;
+					cell.translate(translationVectorInv);
+					// m.addLayer(cell.Layer);
+					break;
+				}
+				return false;
+			}
+		});
+		
 		return cell;
 	}
 
