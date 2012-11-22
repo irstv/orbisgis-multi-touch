@@ -126,11 +126,6 @@
                 </dependency>
                 <dependency>
                         <groupId>mt4j</groupId>
-                        <artifactId>mt4j-core</artifactId>
-                        <version>0.98</version>
-                </dependency>
-                <dependency>
-                        <groupId>mt4j</groupId>
                         <artifactId>mt4j-desktop</artifactId>
                         <version>0.98</version>
                 </dependency>
