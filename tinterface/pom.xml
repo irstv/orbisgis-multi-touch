@@ -24,6 +24,17 @@
                 </pluginManagement>
                 <plugins>
                         <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-jar-plugin</artifactId>
+                                <configuration>
+                                        <archive>
+                                                <manifest>
+                                                        <addClasspath>true</addClasspath>
+                                                </manifest>
+                                        </archive>
+                                </configuration>
+                        </plugin>
+                        <plugin>
                                 <groupId>org.xnap.commons</groupId>
                                 <executions>
                                         <execution>
@@ -89,6 +100,13 @@
         <properties>
                 <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         </properties>
+        <repositories>
+                <repository>
+                        <id>in-project</id>
+                        <name>In Project Repo</name>
+                        <url>file://${project.basedir}/lib</url>
+                </repository>
+        </repositories>
         <dependencies>
                 <dependency>
                         <groupId>junit</groupId>
@@ -105,6 +123,16 @@
                         <groupId>org.orbisgis</groupId>
                         <artifactId>orbisgis-core-monomap</artifactId>
                         <version>4.0-SNAPSHOT</version>
+                </dependency>
+                <dependency>
+                        <groupId>mt4j</groupId>
+                        <artifactId>mt4j-core</artifactId>
+                        <version>0.98</version>
+                </dependency>
+                <dependency>
+                        <groupId>mt4j</groupId>
+                        <artifactId>mt4j-desktop</artifactId>
+                        <version>0.98</version>
                 </dependency>
         </dependencies>
         <pluginRepositories>
