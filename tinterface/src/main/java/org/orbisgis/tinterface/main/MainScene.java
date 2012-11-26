@@ -23,6 +23,11 @@ import org.mt4j.util.math.Vector3D;
 public class MainScene extends AbstractScene {
 
 	/**
+	 * The MTApplication
+	 */
+	private MTApplication mtApplication;
+	
+	/**
 	 * The map
 	 */
 	private Map map;
@@ -48,6 +53,8 @@ public class MainScene extends AbstractScene {
 	 */
 	public MainScene(MTApplication mtApplication, String name) {
 		super(mtApplication, name);
+		
+		this.mtApplication = mtApplication;
 
 		// Add a circle around every point that is touched
 		this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
@@ -156,10 +163,18 @@ public class MainScene extends AbstractScene {
 		/**
 		 * Method called when a tap and hold gesture is detected
 		 */
-		public boolean processGestureEvent(MTGestureEvent gesture) {
+		public boolean processGestureEvent(MTGestureEvent gest) {
+			TapAndHoldEvent gesture = (TapAndHoldEvent) gest;
 			//Check if the gesture is finished and if it was completed
-			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED && ((TapAndHoldEvent) gesture).isHoldComplete()) {
-				System.out.println("Tap and hold");
+			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED && gesture.isHoldComplete()) {
+				//Get the vector corresponding to the position of the start of the tap and hold gesture
+				Vector3D vector = new Vector3D(gesture.getCursor().getStartPosX(), gesture.getCursor().getStartPosY());
+
+				//Get the informations about this position
+				String infos = map.getInfos(vector);
+				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
+				map.addChild(tooltip);
+
 				// map.getInfos(((TapAndHoldEvent)
 				// gesture).getLocationOnScreen());
 			}

@@ -48,7 +48,6 @@ public class Map extends MTRectangle {
 		PImage image = new PImage(im);
 
 		this.setFillColor(new MTColor(0, 255, 0));
-		//this.setPickable(false);
 		//this.setTexture(image);
 		mainScene.getCanvas().addChild(this);
 	}
@@ -73,5 +72,15 @@ public class Map extends MTRectangle {
 		mapContext.read(fileContent);
 		mapContext.open(null);
 		return mapContext;
+	}
+
+	/**
+	 * This function get the informations corresponding the the position of the input vector
+	 * @param vector the vector corresponding the the position
+	 * @return the information about this position (String)
+	 */
+	public String getInfos(Vector3D vector) {
+		// TODO Auto-generated method stub
+		return "Text test";
 	}
 }
