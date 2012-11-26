@@ -1,11 +1,13 @@
 package org.orbisgis.tinterface.main;
 
 import org.mt4j.MTApplication;
+import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
 import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragProcessor;
 import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleProcessor;
+import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldProcessor;
 import org.mt4j.input.inputProcessors.globalProcessors.CursorTracer;
 import org.mt4j.sceneManagement.AbstractScene;
@@ -80,6 +82,10 @@ public class MainScene extends AbstractScene {
 		tap.setHoldTime(3000);
 		map.registerInputProcessor(tap);
 		map.addGestureListener(TapAndHoldProcessor.class, new MapTapAndHold());
+		
+		//Creation of a visualizer for the tap and hold gesture
+		TapAndHoldVisualizer visualizer = new TapAndHoldVisualizer(mtApplication, this.getCanvas());
+		map.addGestureListener(TapAndHoldProcessor.class, visualizer);
 
 	}
 
@@ -115,6 +121,7 @@ public class MainScene extends AbstractScene {
 			Vector3D tVect = ((DragEvent) gesture).getTranslationVect();
 			// Move the map
 			map.move(tVect.x, tVect.y);
+			System.out.println("move");
 
 			return false;
 		}
@@ -133,6 +140,7 @@ public class MainScene extends AbstractScene {
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
 			// Scale the map
+			System.out.println("scale");
 			return false;
 		}
 	}
@@ -146,10 +154,12 @@ public class MainScene extends AbstractScene {
 	private class MapTapAndHold implements IGestureEventListener {
 
 		/**
-		 * Method called when a scale gesture is detected
+		 * Method called when a tap and hold gesture is detected
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
-			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED) {
+			//Check if the gesture is finished and if it was completed
+			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED && ((TapAndHoldEvent) gesture).isHoldComplete()) {
+				System.out.println("Tap and hold");
 				// map.getInfos(((TapAndHoldEvent)
 				// gesture).getLocationOnScreen());
 			}

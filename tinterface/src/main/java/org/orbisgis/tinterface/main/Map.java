@@ -30,6 +30,7 @@ public class Map extends MTRectangle {
 			throws Exception {
 		super(mtApplication, 1300, 710);
 		this.unregisterAllInputProcessors();
+		this.removeAllGestureEventListeners();
 
 		MainContext.initConsoleLogger(true);
 		CoreWorkspace workspace = new CoreWorkspace();
@@ -47,8 +48,8 @@ public class Map extends MTRectangle {
 		PImage image = new PImage(im);
 
 		this.setFillColor(new MTColor(0, 255, 0));
-		this.setPickable(false);
-		this.setTexture(image);
+		//this.setPickable(false);
+		//this.setTexture(image);
 		mainScene.getCanvas().addChild(this);
 	}
 
