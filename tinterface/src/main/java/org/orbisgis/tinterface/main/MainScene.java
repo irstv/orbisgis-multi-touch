@@ -49,7 +49,6 @@ public class MainScene extends AbstractScene {
 	 *            the application
 	 * @param name
 	 *            the name of the scene
-	 * @throws Exception
 	 */
 	public MainScene(MTApplication mtApplication, String name) {
 		super(mtApplication, name);
