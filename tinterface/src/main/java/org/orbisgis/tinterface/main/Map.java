@@ -47,8 +47,8 @@ public class Map extends MTRectangle {
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
 
-		this.setFillColor(new MTColor(0, 255, 0));
-		//this.setTexture(image);
+		//this.setFillColor(new MTColor(0, 255, 0));
+		this.setTexture(image);
 		mainScene.getCanvas().addChild(this);
 	}
 
