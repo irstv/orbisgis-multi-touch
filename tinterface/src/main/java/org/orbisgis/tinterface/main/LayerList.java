@@ -41,7 +41,7 @@ public class LayerList extends MTList{
 	 * @param mtApplication
 	 */
 	public LayerList(MainScene mainScene, MTApplication mtApplication){
-		super(mtApplication,0, 0, 152, 730); 
+		super(mtApplication,0, 0, 152, mtApplication.height); 
 		m = mainScene.getMap();
 
 		// Initialize the lists of colors 
@@ -60,7 +60,7 @@ public class LayerList extends MTList{
 		this.listUsedColors = new LinkedList<MTColor>();
 
 		/// Create Layer menu \\\
-		MTRectangle mapMenu = new MTRectangle(mtApplication,0,0,240, 770);
+		MTRectangle mapMenu = new MTRectangle(mtApplication,0,0,240, mtApplication.height);
 		mapMenu.setFillColor(new MTColor(45,45,45,180));
 		mapMenu.setStrokeColor(new MTColor(45,45,45,180));
 		mapMenu.setPositionGlobal(new Vector3D(mtApplication.width/2f, mtApplication.height/2f));

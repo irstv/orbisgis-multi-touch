@@ -34,7 +34,7 @@ public class Map extends MTRectangle {
 	
 	public Map(MTApplication mtApplication, MainScene mainScene)
 			throws Exception {
-		super(mtApplication, 1300, 710);
+		super(mtApplication, mtApplication.width, mtApplication.height);
 		this.unregisterAllInputProcessors();
 		this.removeAllGestureEventListeners();
 
@@ -75,7 +75,6 @@ public class Map extends MTRectangle {
 
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
-		this.setTexture(new PImage(1300, 700));
 		this.setTexture(image);
 
 	}
