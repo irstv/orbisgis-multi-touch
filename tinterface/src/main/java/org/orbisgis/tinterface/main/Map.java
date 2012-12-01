@@ -16,6 +16,8 @@ import org.orbisgis.core.layerModel.OwsMapContext;
 import org.orbisgis.core.workspace.CoreWorkspace;
 import org.orbisgis.progress.NullProgressMonitor;
 
+import com.vividsolutions.jts.geom.Envelope;
+
 import processing.core.PGraphics;
 import processing.core.PImage;
 
@@ -26,6 +28,10 @@ import processing.core.PImage;
  * 
  */
 public class Map extends MTRectangle {
+	
+	public final MainFrame frame;
+	public final MapContext mapContext;
+	
 	public Map(MTApplication mtApplication, MainScene mainScene)
 			throws Exception {
 		super(mtApplication, 1300, 710);
@@ -38,8 +44,8 @@ public class Map extends MTRectangle {
 				"OrbisGIS_MT" + File.separator);
 		workspace.setWorkspaceFolder(workspaceFolder.getAbsolutePath());
 		MainContext mainContext = new MainContext(true, workspace, true);
-		final MainFrame frame = new MainFrame();
-		final MapContext mapContext = getSampleMapContext();
+		frame = new MainFrame();
+		mapContext = getSampleMapContext();
 		frame.init(mapContext);
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
@@ -47,7 +53,6 @@ public class Map extends MTRectangle {
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
 
-		//this.setFillColor(new MTColor(0, 255, 0));
 		this.setTexture(image);
 		mainScene.getCanvas().addChild(this);
 	}
@@ -61,7 +66,17 @@ public class Map extends MTRectangle {
 	 *            the number of pixel the map need to be moved (in y)
 	 */
 	public void move(float x, float y) {
-		// TODO Auto-generated method stub
+		Envelope extent = frame.mapTransform.getExtent();
+		frame.mapTransform.setExtent(
+				new Envelope(extent.getMinX() + x, extent.getMaxX() + x,
+					extent.getMinY() + y, extent.getMaxY() + y));
+		System.out.println(extent.getMinX()+" et "+extent.getMaxX());
+        mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+
+		BufferedImage im = frame.mapTransform.getImage();
+		PImage image = new PImage(im);
+		this.setTexture(new PImage(1300, 700));
+		this.setTexture(image);
 
 	}
 
