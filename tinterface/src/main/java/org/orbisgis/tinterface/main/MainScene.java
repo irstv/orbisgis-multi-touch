@@ -82,10 +82,10 @@ public class MainScene extends AbstractScene {
 		map.registerInputProcessor(new ScaleProcessor(mtApplication));
 		map.addGestureListener(ScaleProcessor.class, new MapScale());
 
-		// Add the tap and hold gesture on the map (with 3s hold)(the class
+		// Add the tap and hold gesture on the map (with 1s hold)(the class
 		// MapTapAndHold will be used)
 		TapAndHoldProcessor tap = new TapAndHoldProcessor(mtApplication);
-		tap.setHoldTime(3000);
+		tap.setHoldTime(1000);
 		map.registerInputProcessor(tap);
 		map.addGestureListener(TapAndHoldProcessor.class, new MapTapAndHold());
 		
