@@ -1,13 +1,11 @@
 package org.orbisgis.tinterface.main;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 
 import org.mt4j.MTApplication;
 import org.mt4j.components.visibleComponents.shapes.MTRectangle;
-import org.mt4j.util.MTColor;
 import org.mt4j.util.math.Vector3D;
 import org.orbisgis.core.context.main.MainContext;
 import org.orbisgis.core.layerModel.LayerException;
@@ -18,7 +16,6 @@ import org.orbisgis.progress.NullProgressMonitor;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-import processing.core.PGraphics;
 import processing.core.PImage;
 
 /**
@@ -95,6 +92,6 @@ public class Map extends MTRectangle {
 	 */
 	public String getInfos(Vector3D vector) {
 		// TODO Auto-generated method stub
-		return "Text test";
+		return "No information available";
 	}
 }

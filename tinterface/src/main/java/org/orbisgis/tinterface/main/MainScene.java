@@ -130,7 +130,8 @@ public class MainScene extends AbstractScene {
 			// Move the map
 			map.move(tVect.x, tVect.y);
 			System.out.println("move");
-			//Moving all the children of the map (the tooltips)
+			
+			//Move all the children of the map (the tooltips)
 			MTComponent[] children = map.getChildren();
 			int i;
 			for (i=0; i<children.length; i++){
@@ -181,9 +182,6 @@ public class MainScene extends AbstractScene {
 				String infos = map.getInfos(vector);
 				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
 				map.addChild(tooltip);
-
-				// map.getInfos(((TapAndHoldEvent)
-				// gesture).getLocationOnScreen());
 			}
 			return false;
 		}
