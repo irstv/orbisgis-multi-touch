@@ -1,6 +1,7 @@
 package org.orbisgis.tinterface.main;
 
 import org.mt4j.MTApplication;
+import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
 import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
@@ -128,6 +129,13 @@ public class MainScene extends AbstractScene {
 			// Move the map
 			map.move(tVect.x, tVect.y);
 			System.out.println("move");
+			
+			//Move all the children of the map (the tooltips)
+			MTComponent[] children = map.getChildren();
+			int i;
+			for (i=0; i<children.length; i++){
+				children[i].translateGlobal(tVect);
+			}
 
 			return false;
 		}
@@ -173,9 +181,6 @@ public class MainScene extends AbstractScene {
 				String infos = map.getInfos(vector);
 				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
 				map.addChild(tooltip);
-
-				// map.getInfos(((TapAndHoldEvent)
-				// gesture).getLocationOnScreen());
 			}
 			return false;
 		}

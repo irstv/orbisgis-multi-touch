@@ -32,12 +32,8 @@ import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.map.MapTransform;
-import org.orbisgis.progress.NullProgressMonitor;
 
 /**
  * Sample of a component that draw a map context
