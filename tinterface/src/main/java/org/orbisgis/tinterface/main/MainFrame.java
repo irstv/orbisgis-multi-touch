@@ -44,11 +44,11 @@ public class MainFrame {
         /**
          * Load the map context and render into a Buffered Image
          */
-        public void init(MapContext mapContext) {
+        public void init(MapContext mapContext, int width, int height) {
         	this.mapContext = mapContext;
             // Initialise the Renderer           
             mapTransform = new MapTransform();
-            initMapTransform(mapTransform, 1000,700);
+            initMapTransform(mapTransform, width, height);
             mapTransform.setExtent(mapContext.getBoundingBox());
        }
        

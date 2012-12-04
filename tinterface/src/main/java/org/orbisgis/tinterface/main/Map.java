@@ -45,7 +45,7 @@ public class Map extends MTRectangle {
 		MainContext mainContext = new MainContext(true, workspace, true);
 		frame = new MainFrame();
 		mapContext = getSampleMapContext();
-		frame.init(mapContext);
+		frame.init(mapContext, mtApplication.width, mtApplication.height);
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
 
