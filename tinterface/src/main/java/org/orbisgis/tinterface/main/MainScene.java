@@ -1,5 +1,7 @@
 package org.orbisgis.tinterface.main;
 
+import java.awt.Window;
+
 import org.mt4j.MTApplication;
 import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
