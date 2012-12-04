@@ -39,6 +39,9 @@ public class MainScene extends AbstractScene {
 	 * The layer list
 	 */
 	private LayerList layerList;
+	
+	private int compteur;
+	private Vector3D vect;
 
 	/**
 	 * The temporal line
@@ -59,6 +62,8 @@ public class MainScene extends AbstractScene {
 		
 		this.mtApplication = mtApplication;
 
+		compteur =0;
+		vect = new Vector3D(0, 0);
 		// Add a circle around every point that is touched
 		this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
 
@@ -127,11 +132,18 @@ public class MainScene extends AbstractScene {
 		 * Method called when a drag gesture is detected
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
+			compteur++;				
 			// Get the translation vector
 			Vector3D tVect = ((DragEvent) gesture).getTranslationVect();
-			// Move the map
-			map.move(tVect.x, tVect.y);
-			System.out.println("move");
+			vect = vect.addLocal(tVect);
+			if (compteur>2){
+				// Move the map
+				map.move(vect.x, vect.y);
+				System.out.println("move");
+				compteur=0;
+				vect.setX(0);
+				vect.setY(0);
+			}
 			
 			//Move all the children of the map (the tooltips)
 			MTComponent[] children = map.getChildren();

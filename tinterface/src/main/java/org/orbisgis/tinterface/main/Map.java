@@ -28,10 +28,12 @@ public class Map extends MTRectangle {
 	
 	public final MainFrame frame;
 	public final MapContext mapContext;
+	public MTApplication mtApplication;
 	
 	public Map(MTApplication mtApplication, MainScene mainScene)
 			throws Exception {
 		super(mtApplication, mtApplication.width, mtApplication.height);
+		this.mtApplication=mtApplication;
 		this.unregisterAllInputProcessors();
 		this.removeAllGestureEventListeners();
 
@@ -64,10 +66,14 @@ public class Map extends MTRectangle {
 	 */
 	public void move(float x, float y) {
 		Envelope extent = frame.mapTransform.getExtent();
+		double dx = x*extent.getWidth()/mtApplication.width;
+		System.out.println(dx);
+		double dy = y*extent.getHeight()/mtApplication.height;
 		frame.mapTransform.setExtent(
-				new Envelope(extent.getMinX() + x, extent.getMaxX() + x,
-					extent.getMinY() + y, extent.getMaxY() + y));
+				new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
+					extent.getMinY() + dy, extent.getMaxY() + dy));
 		System.out.println(extent.getMinX()+" et "+extent.getMaxX());
+		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
 		BufferedImage im = frame.mapTransform.getImage();
