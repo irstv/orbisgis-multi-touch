@@ -67,12 +67,10 @@ public class Map extends MTRectangle {
 	public void move(float x, float y) {
 		Envelope extent = frame.mapTransform.getExtent();
 		double dx = x*extent.getWidth()/mtApplication.width;
-		System.out.println(dx);
 		double dy = y*extent.getHeight()/mtApplication.height;
 		frame.mapTransform.setExtent(
 				new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
 					extent.getMinY() + dy, extent.getMaxY() + dy));
-		System.out.println(extent.getMinX()+" et "+extent.getMaxX());
 		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
@@ -105,5 +103,18 @@ public class Map extends MTRectangle {
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
 		return image;
+	}
+
+	public void scale(float scaleFactorX, float scaleFactorY) {
+		Envelope extent = frame.mapTransform.getExtent();
+		frame.mapTransform.setExtent(
+				new Envelope(extent.getMinX()+(scaleFactorX-1)*extent.getWidth(), extent.getMaxX()-(scaleFactorX-1)*extent.getWidth(),
+					extent.getMinY()+(scaleFactorY-1)*extent.getHeight(), extent.getMaxY()-(scaleFactorY-1)*extent.getHeight()));
+		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+        mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+
+		BufferedImage im = frame.mapTransform.getImage();
+		PImage image = new PImage(im);
+		this.setTexture(image);		
 	}
 }

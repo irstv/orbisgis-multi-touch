@@ -9,6 +9,7 @@ import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragProcessor;
+import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleProcessor;
 import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldProcessor;
@@ -42,6 +43,8 @@ public class MainScene extends AbstractScene {
 	
 	private int compteur;
 	private Vector3D vect;
+	private float scaleFactorX;
+	private float scaleFactorY;
 
 	/**
 	 * The temporal line
@@ -64,6 +67,8 @@ public class MainScene extends AbstractScene {
 
 		compteur =0;
 		vect = new Vector3D(0, 0);
+		scaleFactorX=1;
+		scaleFactorY=1;
 		// Add a circle around every point that is touched
 		this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
 
@@ -136,10 +141,9 @@ public class MainScene extends AbstractScene {
 			// Get the translation vector
 			Vector3D tVect = ((DragEvent) gesture).getTranslationVect();
 			vect = vect.addLocal(tVect);
-			if (compteur>2){
+			if (compteur>10){
 				// Move the map
 				map.move(vect.x, vect.y);
-				System.out.println("move");
 				compteur=0;
 				vect.setX(0);
 				vect.setY(0);
@@ -169,7 +173,16 @@ public class MainScene extends AbstractScene {
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
 			// Scale the map
-			System.out.println("scale");
+			scaleFactorX=scaleFactorX*((ScaleEvent) gesture).getScaleFactorX();
+			scaleFactorY=scaleFactorY*((ScaleEvent) gesture).getScaleFactorY();
+			compteur++;
+			if (compteur>10){
+				System.out.println(scaleFactorX);
+				map.scale(scaleFactorX,scaleFactorY);
+				compteur=0;
+				scaleFactorX=1;
+				scaleFactorY=1;
+			}
 			return false;
 		}
 	}
