@@ -94,4 +94,10 @@ public class Map extends MTRectangle {
 		// TODO Auto-generated method stub
 		return "No information available";
 	}
+
+	public PImage getThumbnail() {
+		BufferedImage im = frame.mapTransform.getImage();
+		PImage image = new PImage(im);
+		return image;
+	}
 }

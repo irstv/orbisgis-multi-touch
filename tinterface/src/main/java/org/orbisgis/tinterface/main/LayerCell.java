@@ -22,7 +22,7 @@ public class LayerCell extends MTListCell {
 	Map layer;
 
 	/** the Thumbnail */
-	MTImage thumbnail;
+	MTRectangle thumbnail;
 	
 	/** the Label */
 	String label;
@@ -69,7 +69,7 @@ public class LayerCell extends MTListCell {
 		
 	}
 	
-	public MTImage getThumbnail() {
+	public MTRectangle getThumbnail() {
 		return thumbnail;
 	}
 	public void setThumbnail(MTImage thumbnail) {
@@ -101,7 +101,9 @@ public class LayerCell extends MTListCell {
 
 		this.setFillColor(cellFillColor);
 		// Thumbnail is added here (now just a white rectangle)
-		this.addChild(new MTRectangle(mtApplication, (int)(Math.floor(0.1*cellWidth)),10,(int)(Math.floor(0.8*cellWidth)),(int)(Math.floor(0.55*cellHeight)) ));
+		MTRectangle thumbnail = new MTRectangle (mtApplication, 0,1,(int)(Math.floor(cellWidth)),(int)(Math.floor(0.70*cellHeight)) );
+		thumbnail.setTexture(layer.getThumbnail());
+		this.addChild(thumbnail);
 
 		this.setLabel(layer.getName(), mtApplication, font);
 	}
