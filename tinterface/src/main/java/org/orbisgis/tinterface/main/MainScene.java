@@ -1,11 +1,15 @@
 package org.orbisgis.tinterface.main;
 
+import java.awt.Window;
+
 import org.mt4j.MTApplication;
+import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
 import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragProcessor;
+import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleProcessor;
 import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldProcessor;
@@ -36,6 +40,11 @@ public class MainScene extends AbstractScene {
 	 * The layer list
 	 */
 	private LayerList layerList;
+	
+	private int compteur;
+	private Vector3D vect;
+	private float scaleFactorX;
+	private float scaleFactorY;
 
 	/**
 	 * The temporal line
@@ -55,6 +64,10 @@ public class MainScene extends AbstractScene {
 		
 		this.mtApplication = mtApplication;
 
+		compteur =0;
+		vect = new Vector3D(0, 0);
+		scaleFactorX=1;
+		scaleFactorY=1;
 		// Add a circle around every point that is touched
 		this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
 
@@ -82,10 +95,10 @@ public class MainScene extends AbstractScene {
 		map.registerInputProcessor(new ScaleProcessor(mtApplication));
 		map.addGestureListener(ScaleProcessor.class, new MapScale());
 
-		// Add the tap and hold gesture on the map (with 3s hold)(the class
+		// Add the tap and hold gesture on the map (with 1s hold)(the class
 		// MapTapAndHold will be used)
 		TapAndHoldProcessor tap = new TapAndHoldProcessor(mtApplication);
-		tap.setHoldTime(3000);
+		tap.setHoldTime(1000);
 		map.registerInputProcessor(tap);
 		map.addGestureListener(TapAndHoldProcessor.class, new MapTapAndHold());
 		
@@ -123,11 +136,24 @@ public class MainScene extends AbstractScene {
 		 * Method called when a drag gesture is detected
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
+			compteur++;				
 			// Get the translation vector
 			Vector3D tVect = ((DragEvent) gesture).getTranslationVect();
-			// Move the map
-			map.move(tVect.x, tVect.y);
-			System.out.println("move");
+			vect = vect.addLocal(tVect);
+			if (compteur>10){
+				// Move the map
+				map.move(vect.x, vect.y);
+				compteur=0;
+				vect.setX(0);
+				vect.setY(0);
+			}
+			
+			//Move all the children of the map (the tooltips)
+			MTComponent[] children = map.getChildren();
+			int i;
+			for (i=0; i<children.length; i++){
+				children[i].translateGlobal(tVect);
+			}
 
 			return false;
 		}
@@ -146,7 +172,16 @@ public class MainScene extends AbstractScene {
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
 			// Scale the map
-			System.out.println("scale");
+			scaleFactorX=scaleFactorX*((ScaleEvent) gesture).getScaleFactorX();
+			scaleFactorY=scaleFactorY*((ScaleEvent) gesture).getScaleFactorY();
+			compteur++;
+			if (compteur>10){
+				System.out.println(scaleFactorX);
+				map.scale(scaleFactorX,scaleFactorY);
+				compteur=0;
+				scaleFactorX=1;
+				scaleFactorY=1;
+			}
 			return false;
 		}
 	}
@@ -173,9 +208,6 @@ public class MainScene extends AbstractScene {
 				String infos = map.getInfos(vector);
 				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
 				map.addChild(tooltip);
-
-				// map.getInfos(((TapAndHoldEvent)
-				// gesture).getLocationOnScreen());
 			}
 			return false;
 		}
