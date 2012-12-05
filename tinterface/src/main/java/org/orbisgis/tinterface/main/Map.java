@@ -28,10 +28,12 @@ public class Map extends MTRectangle {
 	
 	public final MainFrame frame;
 	public final MapContext mapContext;
+	public MTApplication mtApplication;
 	
 	public Map(MTApplication mtApplication, MainScene mainScene)
 			throws Exception {
 		super(mtApplication, mtApplication.width, mtApplication.height);
+		this.mtApplication=mtApplication;
 		this.unregisterAllInputProcessors();
 		this.removeAllGestureEventListeners();
 
@@ -43,7 +45,7 @@ public class Map extends MTRectangle {
 		MainContext mainContext = new MainContext(true, workspace, true);
 		frame = new MainFrame();
 		mapContext = getSampleMapContext();
-		frame.init(mapContext);
+		frame.init(mapContext, mtApplication.width, mtApplication.height);
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
 
@@ -64,10 +66,12 @@ public class Map extends MTRectangle {
 	 */
 	public void move(float x, float y) {
 		Envelope extent = frame.mapTransform.getExtent();
+		double dx = x*extent.getWidth()/mtApplication.width;
+		double dy = y*extent.getHeight()/mtApplication.height;
 		frame.mapTransform.setExtent(
-				new Envelope(extent.getMinX() + x, extent.getMaxX() + x,
-					extent.getMinY() + y, extent.getMaxY() + y));
-		System.out.println(extent.getMinX()+" et "+extent.getMaxX());
+				new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
+					extent.getMinY() + dy, extent.getMaxY() + dy));
+		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
 		BufferedImage im = frame.mapTransform.getImage();
@@ -93,5 +97,24 @@ public class Map extends MTRectangle {
 	public String getInfos(Vector3D vector) {
 		// TODO Auto-generated method stub
 		return "No information available";
+	}
+
+	public PImage getThumbnail() {
+		BufferedImage im = frame.mapTransform.getImage();
+		PImage image = new PImage(im);
+		return image;
+	}
+
+	public void scale(float scaleFactorX, float scaleFactorY) {
+		Envelope extent = frame.mapTransform.getExtent();
+		frame.mapTransform.setExtent(
+				new Envelope(extent.getMinX()+(scaleFactorX-1)*extent.getWidth(), extent.getMaxX()-(scaleFactorX-1)*extent.getWidth(),
+					extent.getMinY()+(scaleFactorY-1)*extent.getHeight(), extent.getMaxY()-(scaleFactorY-1)*extent.getHeight()));
+		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+        mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+
+		BufferedImage im = frame.mapTransform.getImage();
+		PImage image = new PImage(im);
+		this.setTexture(image);		
 	}
 }
