@@ -13,6 +13,7 @@ import org.orbisgis.core.context.main.MainContext;
 import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.layerModel.OwsMapContext;
+import org.orbisgis.core.map.MapTransform;
 import org.orbisgis.core.workspace.CoreWorkspace;
 import org.orbisgis.progress.NullProgressMonitor;
 
@@ -62,8 +63,19 @@ public class Map extends MTRectangle {
 	 */
 	public void move(float x, float y) {
 		// TODO Auto-generated method stub
+                
 
 	}
+        
+        public void addLayer(File layer) throws LayerException {
+                //Adding layer reference to the OWS file
+                Map.getSampleMapContext();
+        }
+        
+        public void removeLayer(File layer) throws LayerException {
+                //deleting reference from the OWS file
+                Map.getSampleMapContext();
+        }
 
 	private static MapContext getSampleMapContext()
 			throws IllegalStateException, LayerException {
