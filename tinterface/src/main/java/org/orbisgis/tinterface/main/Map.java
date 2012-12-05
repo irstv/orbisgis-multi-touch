@@ -30,9 +30,11 @@ public class Map extends MTRectangle {
 	public final MapContext mapContext;
 	public MTApplication mtApplication;
 	
-	public Map(MTApplication mtApplication, MainScene mainScene)
+	public Map(MTApplication mtApplication, MainScene mainScene, float buffersize)
 			throws Exception {
-		super(mtApplication, mtApplication.width, mtApplication.height);
+		super(mtApplication, mtApplication.width*buffersize, mtApplication.height*buffersize);
+		this.setNoStroke(true);
+		this.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
 		this.mtApplication=mtApplication;
 		this.unregisterAllInputProcessors();
 		this.removeAllGestureEventListeners();
@@ -45,7 +47,13 @@ public class Map extends MTRectangle {
 		MainContext mainContext = new MainContext(true, workspace, true);
 		frame = new MainFrame();
 		mapContext = getSampleMapContext();
-		frame.init(mapContext, mtApplication.width, mtApplication.height);
+		frame.init(mapContext, (int)(mtApplication.width*buffersize), (int)(mtApplication.height*buffersize));
+		Envelope extent = frame.mapTransform.getExtent();
+		double facteur = (buffersize-1)/2;
+		frame.mapTransform.setExtent(
+				new Envelope(extent.getMinX() - facteur*extent.getWidth(), extent.getMaxX() + facteur*extent.getWidth(),
+					extent.getMinY() - facteur*extent.getHeight(), extent.getMaxY() + facteur*extent.getHeight()));
+	
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
 
@@ -64,10 +72,10 @@ public class Map extends MTRectangle {
 	 * @param y
 	 *            the number of pixel the map need to be moved (in y)
 	 */
-	public void move(float x, float y) {
+	public void move(float x, float y, float buffersize) {
 		Envelope extent = frame.mapTransform.getExtent();
-		double dx = x*extent.getWidth()/mtApplication.width;
-		double dy = y*extent.getHeight()/mtApplication.height;
+		double dx = x*extent.getWidth()/(this.getWidthXYGlobal());
+		double dy = y*extent.getHeight()/(this.getHeightXYGlobal());
 		frame.mapTransform.setExtent(
 				new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
 					extent.getMinY() + dy, extent.getMaxY() + dy));

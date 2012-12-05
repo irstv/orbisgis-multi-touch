@@ -45,6 +45,7 @@ public class MainScene extends AbstractScene {
 	private Vector3D vect;
 	private float scaleFactorX;
 	private float scaleFactorY;
+	private float buffersize;
 
 	/**
 	 * The temporal line
@@ -64,6 +65,7 @@ public class MainScene extends AbstractScene {
 		
 		this.mtApplication = mtApplication;
 
+		buffersize = 3;
 		compteur =0;
 		vect = new Vector3D(0, 0);
 		scaleFactorX=1;
@@ -74,7 +76,7 @@ public class MainScene extends AbstractScene {
 		// Instantiate a new map with the default configuration (specify in a
 		// configuration file) and add it to the scene
 		try {
-			setMap(new Map(mtApplication, this));
+			setMap(new Map(mtApplication, this, buffersize));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -140,19 +142,21 @@ public class MainScene extends AbstractScene {
 			// Get the translation vector
 			Vector3D tVect = ((DragEvent) gesture).getTranslationVect();
 			vect = vect.addLocal(tVect);
-			if (compteur>10){
+			map.translateGlobal(tVect);
+			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED){
 				// Move the map
-				map.move(vect.x, vect.y);
-				compteur=0;
+				map.move(vect.x, vect.y, buffersize);
+				
+				//Move all the children of the map (the tooltips)
+				MTComponent[] children = map.getChildren();
+				int i;
+				for (i=0; i<children.length; i++){
+					children[i].translate(vect);
+					System.out.println(vect);
+				}
+				map.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
 				vect.setX(0);
 				vect.setY(0);
-			}
-			
-			//Move all the children of the map (the tooltips)
-			MTComponent[] children = map.getChildren();
-			int i;
-			for (i=0; i<children.length; i++){
-				children[i].translateGlobal(tVect);
 			}
 
 			return false;
@@ -208,6 +212,7 @@ public class MainScene extends AbstractScene {
 				String infos = map.getInfos(vector);
 				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
 				map.addChild(tooltip);
+				tooltip.setPositionGlobal(vector);
 			}
 			return false;
 		}
