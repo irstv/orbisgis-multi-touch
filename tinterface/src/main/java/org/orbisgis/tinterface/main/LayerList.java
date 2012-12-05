@@ -22,6 +22,8 @@ import org.mt4j.util.animation.ani.AniAnimation;
 import org.mt4j.util.font.FontManager;
 import org.mt4j.util.font.IFont;
 import org.mt4j.util.math.Vector3D;
+import org.orbisgis.core.layerModel.ILayer;
+import org.orbisgis.core.layerModel.LayerException;
 
 public class LayerList extends MTList{
 
@@ -160,10 +162,10 @@ public class LayerList extends MTList{
 		
 		/* Generation of the cells */
 		LayerCell cellCreated = null;
-		for(Map mPossible:this.getListOfLayers()) {
+		for(ILayer mPossible:m.mapContext.getLayers()) {
 			cellCreated = this.createListCell(mPossible, font, cellWidth, cellHeight, cellFillColor, mtApplication);
 			
-			if(this.getListOfLayersInPlace().contains(mPossible)){
+			if(mPossible.isVisible()){
 				setNewColorTo(cellCreated);
 			}
 			this.addListElement(cellCreated);
@@ -226,7 +228,7 @@ public class LayerList extends MTList{
 	private boolean doSlideIn = false;
 
 	//  create a draggable Element of the list with a picture and a label
-	private LayerCell createListCell(Map layer, IFont font, float cellWidth, float cellHeight, final MTColor cellFillColor, MTApplication mtApplication){
+	private LayerCell createListCell(ILayer layer, IFont font, float cellWidth, float cellHeight, final MTColor cellFillColor, MTApplication mtApplication){
 		final LayerCell cell = new LayerCell(layer, mtApplication, font, cellFillColor, cellWidth, cellHeight);
 
 		cell.unregisterAllInputProcessors();
@@ -255,6 +257,22 @@ public class LayerList extends MTList{
 					if(Math.abs(translationVectorInv.x) >= 150) {
 						if(!cell.isMapAlreadyInPlace()){
 							setNewColorTo(cell);
+							for(ILayer mPossible:m.mapContext.getLayers()) {
+								System.out.println("essai");
+								System.out.println(cell.getLabel()+" et "+mPossible.getName());
+								System.out.println(mPossible.getName().equals(cell.getName()));
+								if (mPossible.getName().equals(cell.getLabel())){
+									System.out.println("ok1");
+									try {
+										mPossible.setVisible(true);
+										System.out.println("ok");
+									} catch (LayerException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							}
+
 							//m.addLayer(cell.getLayer()); (has to implement "setMapAlreadyInPlace(true);" )
 							// Until then ...
 							cell.setMapAlreadyInPlace(true);

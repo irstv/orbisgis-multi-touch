@@ -8,6 +8,7 @@ import org.mt4j.components.visibleComponents.widgets.MTTextArea;
 import org.mt4j.util.MTColor;
 import org.mt4j.util.font.IFont;
 import org.mt4j.util.math.Vector3D;
+import org.orbisgis.core.layerModel.ILayer;
 
 /**
  * Cell of the LayerList that has the properties of a MTListCell and new attributes and methods to link the cell with a layer
@@ -19,7 +20,7 @@ public class LayerCell extends MTListCell {
 	private boolean mapAlreadyInPlace;
 	
 	/** the Map/Layer */
-	Map layer;
+	ILayer layer;
 
 	/** the Thumbnail */
 	MTRectangle thumbnail;
@@ -37,10 +38,10 @@ public class LayerCell extends MTListCell {
 		this.mapAlreadyInPlace = mapAlreadyInPlace;
 	}
 	
-	public Map getLayer() {
+	public ILayer getLayer() {
 		return layer;
 	}
-	public void setLayer(Map layer) {
+	public void setLayer(ILayer layer) {
 		this.layer = layer;
 	}
 
@@ -92,7 +93,7 @@ public class LayerCell extends MTListCell {
 	 * @param cellWidth : Width of the cell
 	 * @param cellHeight : Height of the cell
 	 */
-	public LayerCell(Map layer, MTApplication mtApplication, IFont font, final MTColor cellFillColor,float cellWidth, float cellHeight) {
+	public LayerCell(ILayer layer, MTApplication mtApplication, IFont font, final MTColor cellFillColor,float cellWidth, float cellHeight) {
 		super(mtApplication, cellWidth, cellHeight);
 		this.setLayer(layer);
 		
@@ -102,7 +103,7 @@ public class LayerCell extends MTListCell {
 		this.setFillColor(cellFillColor);
 		// Thumbnail is added here (now just a white rectangle)
 		MTRectangle thumbnail = new MTRectangle (mtApplication, 0,1,(int)(Math.floor(cellWidth)),(int)(Math.floor(0.70*cellHeight)) );
-		thumbnail.setTexture(layer.getThumbnail());
+		//thumbnail.setTexture(layer.getThumbnail());
 		this.addChild(thumbnail);
 
 		this.setLabel(layer.getName(), mtApplication, font);

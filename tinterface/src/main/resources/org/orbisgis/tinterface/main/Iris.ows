@@ -11,7 +11,42 @@
     <ns3:Layer hidden="false">
       <ns1:Title xml:lang="fr-FR">iris_nantes2008</ns1:Title>
       <ns3:DataURL>
-	<ns3:OnlineResource ns2:href="file:/Users/data/iris_nantes2008/iris_nantes2008.shp" ns2:type="simple"/>
+	<ns3:OnlineResource ns2:href="file:/home/patrick/data/iris_nantes2008/iris_nantes2008.shp" ns2:type="simple"/>
+      </ns3:DataURL>
+      <ns3:StyleList>
+	<ns3:Style>
+	  <ns3:SLD>
+	    <ns4:Style version="2.0.0">
+	      <ns4:Name>Unnamed Style</ns4:Name>
+	      <ns4:Rule>
+		<ns4:AreaSymbolizer uom="urn:ogc:def:uom:se::px" version="2.0.0">
+		  <ns4:Name>Area symbolizer</ns4:Name>
+		  <ns4:SolidFill>
+		    <ns4:Color>#0984E3</ns4:Color>
+		    <ns4:Opacity>1.0</ns4:Opacity>
+		  </ns4:SolidFill>
+		  <ns4:PenStroke>
+		    <ns4:LinearRapport>false</ns4:LinearRapport>
+		    <ns4:Extension>
+		      <ns4:ExtensionParameter name="offsetRapport">off</ns4:ExtensionParameter>
+		    </ns4:Extension>
+		    <ns4:SolidFill>
+		      <ns4:Color>#000000</ns4:Color>
+		      <ns4:Opacity>1.0</ns4:Opacity>
+		    </ns4:SolidFill>
+		    <ns4:Width>0.1</ns4:Width>
+		  </ns4:PenStroke>
+		</ns4:AreaSymbolizer>
+	      </ns4:Rule>
+	    </ns4:Style>
+	  </ns3:SLD>
+	</ns3:Style>
+      </ns3:StyleList>
+    </ns3:Layer>
+    <ns3:Layer hidden="true">
+      <ns1:Title xml:lang="fr-FR">batis</ns1:Title>
+      <ns3:DataURL>
+	<ns3:OnlineResource ns2:href="file:/home/patrick/data/iris_nantes2008/bati_indifferencie_agglo.shp" ns2:type="simple"/>
       </ns3:DataURL>
       <ns3:StyleList>
 	<ns3:Style>

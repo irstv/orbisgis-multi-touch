@@ -55,6 +55,10 @@ public class Map extends MTRectangle {
 					extent.getMinY() - facteur*extent.getHeight(), extent.getMaxY() + facteur*extent.getHeight()));
 	
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+        int i;
+        for (i=0;i<mapContext.getLayers().length;i++){
+        	System.out.println(mapContext.getLayers()[i].getName());
+        }
 
 
 		BufferedImage im = frame.mapTransform.getImage();
