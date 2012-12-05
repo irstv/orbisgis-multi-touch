@@ -145,7 +145,7 @@ public class MainScene extends AbstractScene {
 			map.translateGlobal(tVect);
 			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED){
 				// Move the map
-				map.move(vect.x, vect.y, buffersize);
+				map.move(vect.x, vect.y);
 				
 				//Move all the children of the map (the tooltips)
 				MTComponent[] children = map.getChildren();

@@ -8,6 +8,7 @@ import org.mt4j.MTApplication;
 import org.mt4j.components.visibleComponents.shapes.MTRectangle;
 import org.mt4j.util.math.Vector3D;
 import org.orbisgis.core.context.main.MainContext;
+import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.layerModel.OwsMapContext;
@@ -76,7 +77,7 @@ public class Map extends MTRectangle {
 	 * @param y
 	 *            the number of pixel the map need to be moved (in y)
 	 */
-	public void move(float x, float y, float buffersize) {
+	public void move(float x, float y) {
 		Envelope extent = frame.mapTransform.getExtent();
 		double dx = x*extent.getWidth()/(this.getWidthXYGlobal());
 		double dy = y*extent.getHeight()/(this.getHeightXYGlobal());
@@ -128,5 +129,28 @@ public class Map extends MTRectangle {
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
 		this.setTexture(image);		
+	}
+
+	/**
+	 * This method change the state (visible or not visible) of the layer whose name is in parameter
+	 * @param label the name of the layer
+	 */
+	public void changeLayerState(String label) {
+		for(ILayer layer:mapContext.getLayers()) {
+			if (layer.getName().equals(label)){
+				try {
+					layer.setVisible(!layer.isVisible());
+
+				} catch (LayerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+		mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+		BufferedImage im = frame.mapTransform.getImage();
+		PImage image = new PImage(im);
+		this.setTexture(image);	
 	}
 }

@@ -257,21 +257,7 @@ public class LayerList extends MTList{
 					if(Math.abs(translationVectorInv.x) >= 150) {
 						if(!cell.isMapAlreadyInPlace()){
 							setNewColorTo(cell);
-							for(ILayer mPossible:m.mapContext.getLayers()) {
-								System.out.println("essai");
-								System.out.println(cell.getLabel()+" et "+mPossible.getName());
-								System.out.println(mPossible.getName().equals(cell.getName()));
-								if (mPossible.getName().equals(cell.getLabel())){
-									System.out.println("ok1");
-									try {
-										mPossible.setVisible(true);
-										System.out.println("ok");
-									} catch (LayerException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-								}
-							}
+							m.changeLayerState(cell.getLabel());
 
 							//m.addLayer(cell.getLayer()); (has to implement "setMapAlreadyInPlace(true);" )
 							// Until then ...
@@ -308,6 +294,7 @@ public class LayerList extends MTList{
 						// System.out.println("Tap & Hold finished");
 						cell.setActualColor(cellFillColor);
 						listUsedColors.remove(oldColor);
+						m.changeLayerState(cell.getLabel());
 						// m.removeLayer(cell.getLayer()); (has to implement "setMapAlreadyInPlace(false);" )
 						// Until then
 						cell.setMapAlreadyInPlace(false);
