@@ -135,7 +135,8 @@ public class Map extends MTRectangle {
 	 * This method change the state (visible or not visible) of the layer whose name is in parameter
 	 * @param label the name of the layer
 	 */
-	public void changeLayerState(String label) {
+	public boolean changeLayerState(String label) {
+		boolean visible=false;
 		for(ILayer layer:mapContext.getLayers()) {
 			if (layer.getName().equals(label)){
 				try {
@@ -145,12 +146,15 @@ public class Map extends MTRectangle {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				visible=layer.isVisible();
 			}
 		}
 		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
 		mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
-		this.setTexture(image);	
+		this.setTexture(image);
+		
+		return visible;
 	}
 }
