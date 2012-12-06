@@ -2,6 +2,7 @@ package org.orbisgis.tinterface.main;
 
 import java.awt.Window;
 
+import org.gdms.driver.DriverException;
 import org.mt4j.MTApplication;
 import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
@@ -152,7 +153,6 @@ public class MainScene extends AbstractScene {
 				int i;
 				for (i=0; i<children.length; i++){
 					children[i].translate(vect);
-					System.out.println(vect);
 				}
 				map.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
 				vect.setX(0);
@@ -180,7 +180,6 @@ public class MainScene extends AbstractScene {
 			scaleFactorY=scaleFactorY*((ScaleEvent) gesture).getScaleFactorY();
 			compteur++;
 			if (compteur>10){
-				System.out.println(scaleFactorX);
 				map.scale(scaleFactorX,scaleFactorY);
 				compteur=0;
 				scaleFactorX=1;
@@ -209,7 +208,13 @@ public class MainScene extends AbstractScene {
 				Vector3D vector = new Vector3D(gesture.getCursor().getStartPosX(), gesture.getCursor().getStartPosY());
 
 				//Get the informations about this position
-				String infos = map.getInfos(vector);
+				String infos = null;
+				try {
+					infos = map.getInfos(vector);
+				} catch (DriverException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
 				map.addChild(tooltip);
 				tooltip.setPositionGlobal(vector);

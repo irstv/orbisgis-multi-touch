@@ -4,9 +4,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 
+import org.gdms.data.DataSource;
+import org.gdms.data.DataSourceCreationException;
+import org.gdms.driver.DriverException;
+import org.gdms.driver.driverManager.DriverLoadException;
+import org.gdms.sql.engine.ParseException;
 import org.mt4j.MTApplication;
 import org.mt4j.components.visibleComponents.shapes.MTRectangle;
 import org.mt4j.util.math.Vector3D;
+import org.orbisgis.core.DataManager;
+import org.orbisgis.core.Services;
 import org.orbisgis.core.context.main.MainContext;
 import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.LayerException;
@@ -15,7 +22,12 @@ import org.orbisgis.core.layerModel.OwsMapContext;
 import org.orbisgis.core.workspace.CoreWorkspace;
 import org.orbisgis.progress.NullProgressMonitor;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.io.WKTWriter;
 
 import processing.core.PImage;
 
@@ -106,10 +118,55 @@ public class Map extends MTRectangle {
 	 * This function get the informations corresponding the the position of the input vector
 	 * @param vector the vector corresponding the the position
 	 * @return the information about this position (String)
+	 * @throws DriverException 
 	 */
-	public String getInfos(Vector3D vector) {
-		// TODO Auto-generated method stub
-		return "No information available";
+	public String getInfos(Vector3D vector) throws DriverException {
+		ILayer layer = mapContext.getLayers()[2];
+		DataSource sds = layer.getDataSource();
+		String sql = null;
+		GeometryFactory gf = new GeometryFactory();
+		double minx = vector.getX()*frame.mapTransform.getExtent().getWidth()/mtApplication.width-10;
+		double miny = vector.getY()*frame.mapTransform.getExtent().getHeight()/mtApplication.height-10;
+		double maxx = vector.getX()*frame.mapTransform.getExtent().getWidth()/mtApplication.width+10;
+		double maxy = vector.getY()*frame.mapTransform.getExtent().getHeight()/mtApplication.height+10;
+
+		Coordinate lowerLeft = new Coordinate(minx, miny);
+		Coordinate upperRight = new Coordinate(maxx, maxy);
+		LinearRing envelopeShell = gf.createLinearRing(new Coordinate[] {
+		lowerLeft, new Coordinate(minx, maxy), upperRight,
+		new Coordinate(maxx, miny), lowerLeft, });
+		Geometry geomEnvelope = gf.createPolygon(envelopeShell,
+		new LinearRing[0]);
+		WKTWriter writer = new WKTWriter();
+		sql = "select * from " + layer.getName() + " where ST_intersects("
+		+ sds.getMetadata().getFieldName(sds.getSpatialFieldIndex()) + ", ST_geomfromtext('"
+		+ writer.write(geomEnvelope) + "'));";
+//		sds = ((DataManager) Services
+//				.getService(DataManager.class)).getDataSourceFactory()
+//				.getDataSourceFromSQL(sql);
+		sds.open();
+		String result = sds.getFieldValue(20, 4).toString();
+		return result;
+//		} catch (DriverLoadException e) {
+//			throw new RuntimeException(e);
+////		} catch (DataSourceCreationException e) {
+////			// TODO Auto-generated catch block
+////			e.printStackTrace();
+//		} catch (DriverException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+////		} catch (ParseException e) {
+////			// TODO Auto-generated catch block
+////			e.printStackTrace();
+//		}
+////				try {
+////				Services.getService(InformationManager.class)
+////				.setContents(ds);
+////				} catch (DriverException e) {
+////				Services.getErrorManager().error(
+////				"Cannot show the data", e);
+////				}
+
 	}
 
 	public PImage getThumbnail() {
