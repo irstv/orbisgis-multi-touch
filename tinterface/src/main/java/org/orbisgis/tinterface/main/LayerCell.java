@@ -97,7 +97,7 @@ public class LayerCell extends MTListCell {
 		super(mtApplication, cellWidth, cellHeight);
 		this.setLayer(layer);
 		
-		setMapAlreadyInPlace(false);
+		setMapAlreadyInPlace(layer.isVisible());
 		this.setChildClip(null); //FIXME TEST, no clipping for performance!
 
 		this.setFillColor(cellFillColor);
