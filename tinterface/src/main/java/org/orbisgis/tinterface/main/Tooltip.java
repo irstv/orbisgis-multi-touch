@@ -33,7 +33,7 @@ public class Tooltip extends MTTextArea{
 		//Set the parameters of the tooltip
 		this.setFillColor(new MTColor(20, 20, 20));
 		this.setText(info);
-		this.setPositionGlobal(vector);
+		//this.setPositionGlobal(vector);
 		
 		// Add the tap and hold gesture on the tooltip (with 1s hold)(the class
 		// TooltipTapAndHold will be used) to delete this tooltip

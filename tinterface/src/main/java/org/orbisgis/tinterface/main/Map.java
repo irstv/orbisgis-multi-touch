@@ -8,6 +8,7 @@ import org.mt4j.MTApplication;
 import org.mt4j.components.visibleComponents.shapes.MTRectangle;
 import org.mt4j.util.math.Vector3D;
 import org.orbisgis.core.context.main.MainContext;
+import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.layerModel.OwsMapContext;
@@ -31,9 +32,11 @@ public class Map extends MTRectangle {
 	public final MapContext mapContext;
 	public MTApplication mtApplication;
 	
-	public Map(MTApplication mtApplication, MainScene mainScene)
+	public Map(MTApplication mtApplication, MainScene mainScene, float buffersize)
 			throws Exception {
-		super(mtApplication, mtApplication.width, mtApplication.height);
+		super(mtApplication, mtApplication.width*buffersize, mtApplication.height*buffersize);
+		this.setNoStroke(true);
+		this.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
 		this.mtApplication=mtApplication;
 		this.unregisterAllInputProcessors();
 		this.removeAllGestureEventListeners();
@@ -46,8 +49,18 @@ public class Map extends MTRectangle {
 		MainContext mainContext = new MainContext(true, workspace, true);
 		frame = new MainFrame();
 		mapContext = getSampleMapContext();
-		frame.init(mapContext, mtApplication.width, mtApplication.height);
+		frame.init(mapContext, (int)(mtApplication.width*buffersize), (int)(mtApplication.height*buffersize));
+		Envelope extent = frame.mapTransform.getExtent();
+		double facteur = (buffersize-1)/2;
+		frame.mapTransform.setExtent(
+				new Envelope(extent.getMinX() - facteur*extent.getWidth(), extent.getMaxX() + facteur*extent.getWidth(),
+					extent.getMinY() - facteur*extent.getHeight(), extent.getMaxY() + facteur*extent.getHeight()));
+	
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+        int i;
+        for (i=0;i<mapContext.getLayers().length;i++){
+        	System.out.println(mapContext.getLayers()[i].getName());
+        }
 
 
 		BufferedImage im = frame.mapTransform.getImage();
@@ -69,8 +82,8 @@ public class Map extends MTRectangle {
 		// TODO Auto-generated method stub
                 
 		Envelope extent = frame.mapTransform.getExtent();
-		double dx = x*extent.getWidth()/mtApplication.width;
-		double dy = y*extent.getHeight()/mtApplication.height;
+		double dx = x*extent.getWidth()/(this.getWidthXYGlobal());
+		double dy = y*extent.getHeight()/(this.getHeightXYGlobal());
 		frame.mapTransform.setExtent(
 				new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
 					extent.getMinY() + dy, extent.getMaxY() + dy));
@@ -129,5 +142,28 @@ public class Map extends MTRectangle {
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
 		this.setTexture(image);		
+	}
+
+	/**
+	 * This method change the state (visible or not visible) of the layer whose name is in parameter
+	 * @param label the name of the layer
+	 */
+	public void changeLayerState(String label) {
+		for(ILayer layer:mapContext.getLayers()) {
+			if (layer.getName().equals(label)){
+				try {
+					layer.setVisible(!layer.isVisible());
+
+				} catch (LayerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+		mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+		BufferedImage im = frame.mapTransform.getImage();
+		PImage image = new PImage(im);
+		this.setTexture(image);	
 	}
 }
