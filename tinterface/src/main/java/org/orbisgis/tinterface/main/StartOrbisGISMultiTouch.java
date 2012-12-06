@@ -27,7 +27,7 @@ public class StartOrbisGISMultiTouch extends MTApplication {
          */
         public void startUp() {
         /*Ligne permmetant de lancer le trackpad multitouch des Macs*/
-            //getInputManager().registerInputSource(new MacTrackpadSource(this));
+            getInputManager().registerInputSource(new MacTrackpadSource(this));
                 this.addScene(new MainScene(this, "Map scene"));
         }
 }

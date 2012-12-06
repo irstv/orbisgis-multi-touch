@@ -17,16 +17,18 @@ import org.orbisgis.core.workspace.CoreWorkspace;
 import org.orbisgis.progress.NullProgressMonitor;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.mt4j.input.inputData.InputCursor;
 
 import processing.core.PImage;
 
 /**
  * Constructor of the class Map
- * 
+ *
  * @author patrick
- * 
+ *
  */
 public class Map extends MTRectangle {
+
 	
 	public final MainFrame frame;
 	public final MapContext mapContext;
@@ -56,6 +58,7 @@ public class Map extends MTRectangle {
 				new Envelope(extent.getMinX() - facteur*extent.getWidth(), extent.getMaxX() + facteur*extent.getWidth(),
 					extent.getMinY() - facteur*extent.getHeight(), extent.getMaxY() + facteur*extent.getHeight()));
 	
+
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
         int i;
         for (i=0;i<mapContext.getLayers().length;i++){
@@ -88,6 +91,7 @@ public class Map extends MTRectangle {
 				new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
 					extent.getMinY() + dy, extent.getMaxY() + dy));
 		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
 		BufferedImage im = frame.mapTransform.getImage();
@@ -125,18 +129,18 @@ public class Map extends MTRectangle {
 		return "No information available";
 	}
 
-	public PImage getThumbnail() {
-		BufferedImage im = frame.mapTransform.getImage();
-		PImage image = new PImage(im);
-		return image;
-	}
 
-	public void scale(float scaleFactorX, float scaleFactorY) {
-		Envelope extent = frame.mapTransform.getExtent();
-		frame.mapTransform.setExtent(
-				new Envelope(extent.getMinX()+(scaleFactorX-1)*extent.getWidth(), extent.getMaxX()-(scaleFactorX-1)*extent.getWidth(),
-					extent.getMinY()+(scaleFactorY-1)*extent.getHeight(), extent.getMaxY()-(scaleFactorY-1)*extent.getHeight()));
-		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+    public PImage getThumbnail() {
+        BufferedImage im = frame.mapTransform.getImage();
+        PImage image = new PImage(im);
+        return image;
+    }
+
+    public void scale(float scaleFactorX, float scaleFactorY, InputCursor c1, InputCursor c2, Vector3D tVect) {
+        Envelope extent = frame.mapTransform.getExtent();
+        //System.out.println("xmoy : " + xmoy + "\nxdecal : " + xdecal + "\nminx de base : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth())) + "\nminx : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth()) + xdecal));
+        //sframe.mapTransform.setExtent(new Envelope(c1., scaleFactorY, scaleFactorY, scaleFactorY));
+        frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
 		BufferedImage im = frame.mapTransform.getImage();
@@ -166,4 +170,5 @@ public class Map extends MTRectangle {
 		PImage image = new PImage(im);
 		this.setTexture(image);	
 	}
+
 }

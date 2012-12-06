@@ -11,3 +11,21 @@ bin/
 tinterface/src/main/resources/org/orbisgis/tinterface/main/Iris.ows
 
 tinterface/src/main/resources/org/orbisgis/tinterface/main/Iris.ows
+
+*.dll
+
+*.dll
+
+tinterface/ManyMouse.dll
+
+*.jnilib
+
+*.so
+
+tinterface/ToDo.txt
+
+tinterface/Readme.txt
+
+tinterface/License.txt
+
+tinterface/whirlycache-default.xml

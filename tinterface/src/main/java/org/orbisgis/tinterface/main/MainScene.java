@@ -5,6 +5,7 @@ import java.awt.Window;
 import org.mt4j.MTApplication;
 import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
+import org.mt4j.input.inputData.InputCursor;
 import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragEvent;
@@ -65,7 +66,7 @@ public class MainScene extends AbstractScene {
 		
 		this.mtApplication = mtApplication;
 
-		buffersize = 3;
+		buffersize = 1;
 		compteur =0;
 		vect = new Vector3D(0, 0);
 		scaleFactorX=1;
@@ -178,10 +179,19 @@ public class MainScene extends AbstractScene {
 			// Scale the map
 			scaleFactorX=scaleFactorX*((ScaleEvent) gesture).getScaleFactorX();
 			scaleFactorY=scaleFactorY*((ScaleEvent) gesture).getScaleFactorY();
+                        InputCursor firstCursor = ((ScaleEvent) gesture).getFirstCursor();
+                        InputCursor secondCursor = ((ScaleEvent) gesture).getSecondCursor();
+                        float xdiff1 = firstCursor.getCurrentEvtPosX() - firstCursor.getStartPosX();
+                        float ydiff1 = firstCursor.getCurrentEvtPosY() - firstCursor.getStartPosY();
+                        float xdiff2 = secondCursor.getCurrentEvtPosX() - secondCursor.getStartPosX();
+                        float ydiff2 = secondCursor.getCurrentEvtPosY() - secondCursor.getStartPosY();
+                        Vector3D tVect = new Vector3D((xdiff1-xdiff2)/scaleFactorX, (ydiff1-ydiff2)/scaleFactorY);
+			vect = vect.addLocal(tVect);
+			map.translateGlobal(tVect);
 			compteur++;
-			if (compteur>10){
-				System.out.println(scaleFactorX);
-				map.scale(scaleFactorX,scaleFactorY);
+			if (compteur>1){
+                                map.move(vect.x, vect.y);
+				map.scale(scaleFactorX,scaleFactorY,((ScaleEvent)gesture).getFirstCursor(),((ScaleEvent)gesture).getSecondCursor(), tVect);
 				compteur=0;
 				scaleFactorX=1;
 				scaleFactorY=1;
