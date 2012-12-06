@@ -2,7 +2,9 @@ package org.orbisgis.tinterface.main;
 
 import java.awt.Window;
 
+import org.gdms.data.DataSourceCreationException;
 import org.gdms.driver.DriverException;
+import org.gdms.sql.engine.ParseException;
 import org.mt4j.MTApplication;
 import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
@@ -210,7 +212,15 @@ public class MainScene extends AbstractScene {
 				//Get the informations about this position
 				String infos = null;
 				try {
-					infos = map.getInfos(vector);
+					try {
+						infos = map.getInfos(vector);
+					} catch (DataSourceCreationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} catch (DriverException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

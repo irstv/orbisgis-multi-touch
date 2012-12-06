@@ -119,16 +119,19 @@ public class Map extends MTRectangle {
 	 * @param vector the vector corresponding the the position
 	 * @return the information about this position (String)
 	 * @throws DriverException 
+	 * @throws ParseException 
+	 * @throws DataSourceCreationException 
 	 */
-	public String getInfos(Vector3D vector) throws DriverException {
+	public String getInfos(Vector3D vector) throws DriverException, DataSourceCreationException, ParseException {
 		ILayer layer = mapContext.getLayers()[2];
 		DataSource sds = layer.getDataSource();
+		Envelope extent = frame.mapTransform.getExtent();
 		String sql = null;
 		GeometryFactory gf = new GeometryFactory();
-		double minx = vector.getX()*frame.mapTransform.getExtent().getWidth()/mtApplication.width-10;
-		double miny = vector.getY()*frame.mapTransform.getExtent().getHeight()/mtApplication.height-10;
-		double maxx = vector.getX()*frame.mapTransform.getExtent().getWidth()/mtApplication.width+10;
-		double maxy = vector.getY()*frame.mapTransform.getExtent().getHeight()/mtApplication.height+10;
+		double minx = extent.getMinX()+vector.getX()*extent.getWidth()/mtApplication.width-10;
+		double miny = extent.getMinY()+vector.getY()*extent.getHeight()/mtApplication.height-10;
+		double maxx = extent.getMinX()+vector.getX()*extent.getWidth()/mtApplication.width+10;
+		double maxy = extent.getMinY()+vector.getY()*extent.getHeight()/mtApplication.height+10;
 
 		Coordinate lowerLeft = new Coordinate(minx, miny);
 		Coordinate upperRight = new Coordinate(maxx, maxy);
@@ -141,11 +144,22 @@ public class Map extends MTRectangle {
 		sql = "select * from " + layer.getName() + " where ST_intersects("
 		+ sds.getMetadata().getFieldName(sds.getSpatialFieldIndex()) + ", ST_geomfromtext('"
 		+ writer.write(geomEnvelope) + "'));";
-//		sds = ((DataManager) Services
-//				.getService(DataManager.class)).getDataSourceFactory()
-//				.getDataSourceFromSQL(sql);
-		sds.open();
-		String result = sds.getFieldValue(20, 4).toString();
+		DataSource sds2 = ((DataManager) Services
+				.getService(DataManager.class)).getDataSourceFactory()
+				.getDataSourceFromSQL(sql);
+		sds2.open();
+		int i;
+		String result = "";
+		System.out.println("Nb lignes : "+sds2.getRowCount());
+		if (sds2.getRowCount()==0){
+			result = "No Information Available";
+		}
+		else{
+			for (i=1;i<sds2.getFieldCount();i++){
+				result = result + sds2.getFieldName(i)+" : "+sds2.getFieldValue(0, i).toString()+"\n";
+			}
+		}
+
 		return result;
 //		} catch (DriverLoadException e) {
 //			throw new RuntimeException(e);
