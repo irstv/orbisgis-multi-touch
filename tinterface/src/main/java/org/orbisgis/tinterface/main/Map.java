@@ -130,7 +130,9 @@ public class Map extends MTRectangle {
 	}
 
 
-    public PImage getThumbnail() {
+    public PImage getThumbnail(ILayer layer) {
+        frame.mapTransform.setExtent(layer.getEnvelope());
+        mapContext.draw(frame.mapTransform, new NullProgressMonitor(), layer);
         BufferedImage im = frame.mapTransform.getImage();
         PImage image = new PImage(im);
         return image;
