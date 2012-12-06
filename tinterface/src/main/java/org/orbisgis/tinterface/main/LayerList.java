@@ -113,7 +113,7 @@ public class LayerList extends MTList{
 		this.setM(mainScene.getMap());
 
 		/* Creates Layer Panel */
-		MTRectangle layerPanel = new MTRectangle(mtApplication,0,0,240, 770);
+		MTRectangle layerPanel = new MTRectangle(mtApplication,0,0,240, mtApplication.height);
 		layerPanel.setFillColor(new MTColor(45,45,45,180));
 		layerPanel.setStrokeColor(new MTColor(45,45,45,180));
 		layerPanel.setPositionGlobal(new Vector3D(mtApplication.width/2f, mtApplication.height/2f));
