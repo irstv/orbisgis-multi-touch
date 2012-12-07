@@ -128,10 +128,10 @@ public class Map extends MTRectangle {
 		Envelope extent = frame.mapTransform.getExtent();
 		String sql = null;
 		GeometryFactory gf = new GeometryFactory();
-		double minx = extent.getMinX()+(vector.getX()+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize)-10;
-		double miny = extent.getMinY()+(mtApplication.height-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize)-10;
-		double maxx = extent.getMinX()+(vector.getX()+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize)+10;
-		double maxy = extent.getMinY()+(mtApplication.height-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize)+10;
+		double minx = extent.getMinX()+(vector.getX()-10+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
+		double miny = extent.getMinY()+(mtApplication.height-10-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
+		double maxx = extent.getMinX()+(vector.getX()+10+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
+		double maxy = extent.getMinY()+(mtApplication.height-vector.getY()+10+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
 
 		Coordinate lowerLeft = new Coordinate(minx, miny);
 		Coordinate upperRight = new Coordinate(maxx, maxy);
@@ -151,13 +151,16 @@ public class Map extends MTRectangle {
 		int i;
 		String result = "";
 		System.out.println("Nb lignes : "+sds2.getRowCount());
-		if (sds2.getRowCount()==0){
+		switch ((int)(sds2.getRowCount())){
+		case 0 :
 			result = "No Information Available";
-		}
-		else{
+			break;
+		case 1 : 			
 			for (i=1;i<sds2.getFieldCount();i++){
 				result = result + sds2.getFieldName(i)+" : "+sds2.getFieldValue(0, i).toString()+"\n";
-			}
+			};
+			break;
+		default : result = "Zoom to have more precise informations"; break;
 		}
 
 		return result;
