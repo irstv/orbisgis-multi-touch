@@ -213,7 +213,7 @@ public class MainScene extends AbstractScene {
 				String infos = null;
 				try {
 					try {
-						infos = map.getInfos(vector);
+						infos = map.getInfos(vector, buffersize);
 					} catch (DataSourceCreationException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

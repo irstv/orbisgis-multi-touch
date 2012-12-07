@@ -122,16 +122,16 @@ public class Map extends MTRectangle {
 	 * @throws ParseException 
 	 * @throws DataSourceCreationException 
 	 */
-	public String getInfos(Vector3D vector) throws DriverException, DataSourceCreationException, ParseException {
+	public String getInfos(Vector3D vector, float buffersize) throws DriverException, DataSourceCreationException, ParseException {
 		ILayer layer = mapContext.getLayers()[2];
 		DataSource sds = layer.getDataSource();
 		Envelope extent = frame.mapTransform.getExtent();
 		String sql = null;
 		GeometryFactory gf = new GeometryFactory();
-		double minx = extent.getMinX()+vector.getX()*extent.getWidth()/mtApplication.width-10;
-		double miny = extent.getMinY()+vector.getY()*extent.getHeight()/mtApplication.height-10;
-		double maxx = extent.getMinX()+vector.getX()*extent.getWidth()/mtApplication.width+10;
-		double maxy = extent.getMinY()+vector.getY()*extent.getHeight()/mtApplication.height+10;
+		double minx = extent.getMinX()+(vector.getX()+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize)-10;
+		double miny = extent.getMinY()+(mtApplication.height-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize)-10;
+		double maxx = extent.getMinX()+(vector.getX()+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize)+10;
+		double maxy = extent.getMinY()+(mtApplication.height-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize)+10;
 
 		Coordinate lowerLeft = new Coordinate(minx, miny);
 		Coordinate upperRight = new Coordinate(maxx, maxy);
