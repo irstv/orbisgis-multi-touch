@@ -70,11 +70,6 @@ public class Map extends MTRectangle {
 					extent.getMinY() - facteur*extent.getHeight(), extent.getMaxY() + facteur*extent.getHeight()));
 	
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
-        int i;
-        for (i=0;i<mapContext.getLayers().length;i++){
-        	System.out.println(mapContext.getLayers()[i].getName());
-        }
-
 
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
@@ -132,14 +127,10 @@ public class Map extends MTRectangle {
 			GeometryFactory gf = new GeometryFactory();
 			
 			//Create a square of 20 pixels around the touched point
-			double minx = this.getCorrespondingX(vector.getX()-10);
-			double miny = this.getCorrespondingY(vector.getY()+10);
-			double maxx = this.getCorrespondingX(vector.getX()+10);
-			double maxy = this.getCorrespondingY(vector.getY()-10);
-			Coordinate lowerLeft = new Coordinate(minx, miny);
-			Coordinate upperRight = new Coordinate(maxx, maxy);
-			Coordinate lowerRight = new Coordinate(maxx, miny);
-			Coordinate upperLeft = new Coordinate(minx, maxy);
+			Coordinate lowerLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()+10));
+			Coordinate upperRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()-10));
+			Coordinate lowerRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()+10));
+			Coordinate upperLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()-10));
 
 			LinearRing envelopeShell = gf.createLinearRing(new Coordinate[] {
 					lowerLeft, upperLeft, upperRight, lowerRight, lowerLeft, });
@@ -180,7 +171,8 @@ public class Map extends MTRectangle {
 			e.printStackTrace();
 			information = "No Information Available";
 		}
-		return information;
+		//Return the string (without the last \n)
+		return information.trim();
 	}
 
 	public PImage getThumbnail() {
@@ -230,25 +222,17 @@ public class Map extends MTRectangle {
 	}
 	
 	/**
-	 * This method return the value in x of the 
-	 * @param xPixel
-	 * @return
+	 * This method return the coordinate corresponding to the point of the screen (in pixels) in parameter
+	 * @param vector the point in pixel
+	 * @return coord the corresponding coordinate
 	 */
-	public double getCorrespondingX(float xPixel){
+	public Coordinate convert(Vector3D vector){
 		Envelope extent = frame.mapTransform.getExtent();
-		double xExtent;
 		
-		xExtent = extent.getMinX()+(xPixel + mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
-		
-		return xExtent;
-	}
-	
-	public double getCorrespondingY(float yPixel){
-		Envelope extent = frame.mapTransform.getExtent();
-		double yExtent;
-		
-		yExtent = extent.getMinY()+(mtApplication.height-yPixel+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
-	
-		return yExtent;
+		double x = extent.getMinX()+(vector.getX() + mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
+		double y = extent.getMinY()+(mtApplication.height-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
+
+		Coordinate coord = new Coordinate(x, y);
+		return coord;
 	}
 }
