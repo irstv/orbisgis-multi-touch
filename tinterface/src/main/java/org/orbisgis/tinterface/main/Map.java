@@ -42,6 +42,7 @@ public class Map extends MTRectangle {
 	public final MainFrame frame;
 	public final MapContext mapContext;
 	public MTApplication mtApplication;
+	public float buffersize;
 	
 	public Map(MTApplication mtApplication, MainScene mainScene, float buffersize)
 			throws Exception {
@@ -49,6 +50,7 @@ public class Map extends MTRectangle {
 		this.setNoStroke(true);
 		this.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
 		this.mtApplication=mtApplication;
+		this.buffersize = buffersize;
 		this.unregisterAllInputProcessors();
 		this.removeAllGestureEventListeners();
 
@@ -116,65 +118,69 @@ public class Map extends MTRectangle {
 
 	/**
 	 * This function get the informations corresponding the the position of the input vector
-	 * @param vector the vector corresponding the the position
+	 * @param vector the vector corresponding to the position
 	 * @return the information about this position (String)
 	 */
-	public String getInfos(Vector3D vector, float buffersize){
-		String result = "";
-
-		try{
-		ILayer layer = mapContext.getLayers()[2];
-		DataSource sds = layer.getDataSource();
-		Envelope extent = frame.mapTransform.getExtent();
-		String sql = null;
-		GeometryFactory gf = new GeometryFactory();
-		double minx = extent.getMinX()+(vector.getX()-10+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
-		double miny = extent.getMinY()+(mtApplication.height-10-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
-		double maxx = extent.getMinX()+(vector.getX()+10+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
-		double maxy = extent.getMinY()+(mtApplication.height-vector.getY()+10+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
-
-		Coordinate lowerLeft = new Coordinate(minx, miny);
-		Coordinate upperRight = new Coordinate(maxx, maxy);
-		LinearRing envelopeShell = gf.createLinearRing(new Coordinate[] {
-		lowerLeft, new Coordinate(minx, maxy), upperRight,
-		new Coordinate(maxx, miny), lowerLeft, });
-		Geometry geomEnvelope = gf.createPolygon(envelopeShell,
-		new LinearRing[0]);
-		WKTWriter writer = new WKTWriter();
-		sql = "select * from " + layer.getName() + " where ST_intersects("
-		+ sds.getMetadata().getFieldName(sds.getSpatialFieldIndex()) + ", ST_geomfromtext('"
-		+ writer.write(geomEnvelope) + "'));";
-		DataSource sds2 = ((DataManager) Services
-				.getService(DataManager.class)).getDataSourceFactory()
-				.getDataSourceFromSQL(sql);
-		sds2.open();
+	public String getInfos(Vector3D vector){
+		String information = "";
 		int i;
-		System.out.println("Nb lignes : "+sds2.getRowCount());
-		switch ((int)(sds2.getRowCount())){
-		case 0 :
-			result = "No Information Available";
-			break;
-		case 1 : 			
-			for (i=1;i<sds2.getFieldCount();i++){
-				result = result + sds2.getFieldName(i)+" : "+sds2.getFieldValue(0, i).toString()+"\n";
-			};
-			break;
-		default : result = "Zoom to have more precise informations"; break;
-		}
+		String sql = null;
+		
+		try{
+			ILayer layer = mapContext.getLayers()[2];
+			DataSource dataSourceInitial = layer.getDataSource();
+			GeometryFactory gf = new GeometryFactory();
+			
+			//Create a square of 20 pixels around the touched point
+			double minx = this.getCorrespondingX(vector.getX()-10);
+			double miny = this.getCorrespondingY(vector.getY()+10);
+			double maxx = this.getCorrespondingX(vector.getX()+10);
+			double maxy = this.getCorrespondingY(vector.getY()-10);
+			Coordinate lowerLeft = new Coordinate(minx, miny);
+			Coordinate upperRight = new Coordinate(maxx, maxy);
+			Coordinate lowerRight = new Coordinate(maxx, miny);
+			Coordinate upperLeft = new Coordinate(minx, maxy);
+
+			LinearRing envelopeShell = gf.createLinearRing(new Coordinate[] {
+					lowerLeft, upperLeft, upperRight, lowerRight, lowerLeft, });
+			Geometry geomEnvelope = gf.createPolygon(envelopeShell,
+					new LinearRing[0]);
+			
+			//Get the DataSource corresponding to the square in dataSourceSquare
+			WKTWriter writer = new WKTWriter();
+			sql = "select * from " + layer.getName() + " where ST_intersects("
+					+ dataSourceInitial.getMetadata().getFieldName(dataSourceInitial.getSpatialFieldIndex()) + ", ST_geomfromtext('"
+					+ writer.write(geomEnvelope) + "'));";
+			DataSource dataSourceSquare = ((DataManager) Services
+					.getService(DataManager.class)).getDataSourceFactory()
+					.getDataSourceFromSQL(sql);
+			dataSourceSquare.open();
+			
+			//Put the information from dataSourceSquare in the variable if only one line match the touched rectangle
+			switch ((int)(dataSourceSquare.getRowCount())){
+			case 0 :
+				information = "No Information Available";
+				break;
+			case 1 : 			
+				for (i=1;i<dataSourceSquare.getFieldCount();i++){
+					information = information + dataSourceSquare.getFieldName(i)+" : "+dataSourceSquare.getFieldValue(0, i).toString()+"\n";
+				};
+				break;
+			default : information = "Zoom to have more precise informations"; break;
+			}
 		} catch (DriverLoadException e) {
 			throw new RuntimeException(e);
 		} catch (DataSourceCreationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			information = "No Information Available";
 		} catch (DriverException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			information = "No Information Available";
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			information = "No Information Available";
 		}
-		return result;
-
+		return information;
 	}
 
 	public PImage getThumbnail() {
@@ -221,5 +227,28 @@ public class Map extends MTRectangle {
 		this.setTexture(image);
 		
 		return visible;
+	}
+	
+	/**
+	 * This method return the value in x of the 
+	 * @param xPixel
+	 * @return
+	 */
+	public double getCorrespondingX(float xPixel){
+		Envelope extent = frame.mapTransform.getExtent();
+		double xExtent;
+		
+		xExtent = extent.getMinX()+(xPixel + mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
+		
+		return xExtent;
+	}
+	
+	public double getCorrespondingY(float yPixel){
+		Envelope extent = frame.mapTransform.getExtent();
+		double yExtent;
+		
+		yExtent = extent.getMinY()+(mtApplication.height-yPixel+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
+	
+		return yExtent;
 	}
 }
