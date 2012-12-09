@@ -8,7 +8,6 @@ import org.mt4j.input.inputProcessors.MTGestureEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.tapAndHoldProcessor.TapAndHoldProcessor;
 import org.mt4j.util.MTColor;
-import org.mt4j.util.math.Vector3D;
 
 /**
  * Class used for creating and managing tooltip
@@ -23,7 +22,7 @@ public class Tooltip extends MTTextArea{
 	 * @param vector the position of the tooltip
 	 * @param info the text in the tooltip
 	 */
-	public Tooltip(MTApplication mtApplication, Vector3D vector, String info){
+	public Tooltip(MTApplication mtApplication, String info){
 		super(mtApplication);
 		
 		//Unregister the default gestures (so that the tooltip can't be moved)
@@ -33,7 +32,6 @@ public class Tooltip extends MTTextArea{
 		//Set the parameters of the tooltip
 		this.setFillColor(new MTColor(20, 20, 20));
 		this.setText(info);
-		//this.setPositionGlobal(vector);
 		
 		// Add the tap and hold gesture on the tooltip (with 1s hold)(the class
 		// TooltipTapAndHold will be used) to delete this tooltip
@@ -49,7 +47,7 @@ public class Tooltip extends MTTextArea{
 
 	
 	/**
-	 * Nested class used when a tap and hold gesture on the map is detected
+	 * Nested class used when a tap and hold gesture on the tooltip is detected
 	 * 
 	 * @author patrick
 	 * 

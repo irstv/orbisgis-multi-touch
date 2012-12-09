@@ -212,7 +212,7 @@ public class MainScene extends AbstractScene {
 				//Get the informations about this position
 				String infos = null;
 				infos = map.getInfos(vector, buffersize);
-				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
+				Tooltip tooltip = new Tooltip(mtApplication, infos);
 				map.addChild(tooltip);
 				tooltip.setPositionGlobal(vector);
 			}
