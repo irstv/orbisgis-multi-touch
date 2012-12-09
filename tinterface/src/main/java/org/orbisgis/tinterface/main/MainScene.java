@@ -211,20 +211,7 @@ public class MainScene extends AbstractScene {
 
 				//Get the informations about this position
 				String infos = null;
-				try {
-					try {
-						infos = map.getInfos(vector, buffersize);
-					} catch (DataSourceCreationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				} catch (DriverException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				infos = map.getInfos(vector, buffersize);
 				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
 				map.addChild(tooltip);
 				tooltip.setPositionGlobal(vector);

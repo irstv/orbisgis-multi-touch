@@ -118,11 +118,11 @@ public class Map extends MTRectangle {
 	 * This function get the informations corresponding the the position of the input vector
 	 * @param vector the vector corresponding the the position
 	 * @return the information about this position (String)
-	 * @throws DriverException 
-	 * @throws ParseException 
-	 * @throws DataSourceCreationException 
 	 */
-	public String getInfos(Vector3D vector, float buffersize) throws DriverException, DataSourceCreationException, ParseException {
+	public String getInfos(Vector3D vector, float buffersize){
+		String result = "";
+
+		try{
 		ILayer layer = mapContext.getLayers()[2];
 		DataSource sds = layer.getDataSource();
 		Envelope extent = frame.mapTransform.getExtent();
@@ -149,7 +149,6 @@ public class Map extends MTRectangle {
 				.getDataSourceFromSQL(sql);
 		sds2.open();
 		int i;
-		String result = "";
 		System.out.println("Nb lignes : "+sds2.getRowCount());
 		switch ((int)(sds2.getRowCount())){
 		case 0 :
@@ -162,27 +161,19 @@ public class Map extends MTRectangle {
 			break;
 		default : result = "Zoom to have more precise informations"; break;
 		}
-
+		} catch (DriverLoadException e) {
+			throw new RuntimeException(e);
+		} catch (DataSourceCreationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DriverException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return result;
-//		} catch (DriverLoadException e) {
-//			throw new RuntimeException(e);
-////		} catch (DataSourceCreationException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-//		} catch (DriverException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-////		} catch (ParseException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-//		}
-////				try {
-////				Services.getService(InformationManager.class)
-////				.setContents(ds);
-////				} catch (DriverException e) {
-////				Services.getErrorManager().error(
-////				"Cannot show the data", e);
-////				}
 
 	}
 
