@@ -118,25 +118,51 @@ public class Map extends MTRectangle {
 	 */
 	public String getInfos(Vector3D vector){
 		String information = "";
+		GeometryFactory gf = new GeometryFactory();
+		int i=0;
+			
+		//Create a square of 20 pixels around the touched point
+		Coordinate lowerLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()+10));
+		Coordinate upperRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()-10));
+		Coordinate lowerRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()+10));
+		Coordinate upperLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()-10));
+
+		LinearRing envelopeShell = gf.createLinearRing(new Coordinate[] {
+				lowerLeft, upperLeft, upperRight, lowerRight, lowerLeft, });
+		Geometry geomEnvelope = gf.createPolygon(envelopeShell,
+				new LinearRing[0]);
+		
+		//Look for information in all the visible layers (stop when information is found)
+		while ((information.equals("")) && i<mapContext.getLayers().length){
+			if (mapContext.getLayers()[i].isVisible()){
+				information=getInfos(mapContext.getLayers()[i], geomEnvelope);
+			}
+			i++;
+		}
+		
+		//If no information was found, we return this message
+		if (information.equals("")){
+			information = "No Information Available";
+		}
+		
+		//Return the string (without the last \n)
+		return information.trim();
+	}
+	
+	/**
+	 * This method return the information present in the layer and the square in parameter 
+	 * @param layer the layer in which we look for information
+	 * @param geomEnvelope the square in which to look
+	 * @return the information
+	 */
+	public String getInfos(ILayer layer, Geometry geomEnvelope){
+		String information = "";
 		int i;
 		String sql = null;
-		
+		System.out.println(layer.getName());
 		try{
-			ILayer layer = mapContext.getLayers()[2];
 			DataSource dataSourceInitial = layer.getDataSource();
-			GeometryFactory gf = new GeometryFactory();
-			
-			//Create a square of 20 pixels around the touched point
-			Coordinate lowerLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()+10));
-			Coordinate upperRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()-10));
-			Coordinate lowerRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()+10));
-			Coordinate upperLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()-10));
-
-			LinearRing envelopeShell = gf.createLinearRing(new Coordinate[] {
-					lowerLeft, upperLeft, upperRight, lowerRight, lowerLeft, });
-			Geometry geomEnvelope = gf.createPolygon(envelopeShell,
-					new LinearRing[0]);
-			
+					
 			//Get the DataSource corresponding to the square in dataSourceSquare
 			WKTWriter writer = new WKTWriter();
 			sql = "select * from " + layer.getName() + " where ST_intersects("
@@ -150,7 +176,7 @@ public class Map extends MTRectangle {
 			//Put the information from dataSourceSquare in the variable if only one line match the touched rectangle
 			switch ((int)(dataSourceSquare.getRowCount())){
 			case 0 :
-				information = "No Information Available";
+				information = "";
 				break;
 			case 1 : 			
 				for (i=1;i<dataSourceSquare.getFieldCount();i++){
@@ -171,8 +197,8 @@ public class Map extends MTRectangle {
 			e.printStackTrace();
 			information = "No Information Available";
 		}
-		//Return the string (without the last \n)
-		return information.trim();
+		
+		return information;
 	}
 
 	public PImage getThumbnail() {
