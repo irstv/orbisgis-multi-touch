@@ -8,9 +8,6 @@ Settings.txt
 .settings
 bin/
 *.ows
-tinterface/src/main/resources/org/orbisgis/tinterface/main/Iris.ows
-
-tinterface/src/main/resources/org/orbisgis/tinterface/main/Iris.ows
 
 *.dll
 

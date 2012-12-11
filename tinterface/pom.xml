@@ -62,7 +62,7 @@
                                         <arguments>
                                                 <argument>-classpath</argument>
                                                 <classpath />
-                                                <argument>org.orbisgis.tinterface.main.Main</argument>
+                                                <argument>org.orbisgis.tinterface.main.StartOrbisGISMultiTouch</argument>
                                         </arguments>
                                 </configuration>
                         </plugin>
@@ -72,7 +72,7 @@
                                 <configuration>
                                         <archive>
                                                 <manifest>
-                                                        <mainClass>org.orbisgis.view.main.Main</mainClass>
+                                                        <mainClass>org.orbisgis.tinterface.main.StartOrbisGISMultiTouch</mainClass>
                                                 </manifest>
                                         </archive>
                                         <descriptors>

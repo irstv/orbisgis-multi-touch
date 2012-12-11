@@ -2,6 +2,9 @@ package org.orbisgis.tinterface.main;
 
 import java.awt.Window;
 
+import org.gdms.data.DataSourceCreationException;
+import org.gdms.driver.DriverException;
+import org.gdms.sql.engine.ParseException;
 import org.mt4j.MTApplication;
 import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
@@ -46,7 +49,6 @@ public class MainScene extends AbstractScene {
 	private Vector3D vect;
 	private float scaleFactorX;
 	private float scaleFactorY;
-	private float buffersize;
 
 	/**
 	 * The temporal line
@@ -66,7 +68,6 @@ public class MainScene extends AbstractScene {
 		
 		this.mtApplication = mtApplication;
 
-		buffersize = 1;
 		compteur =0;
 		vect = new Vector3D(0, 0);
 		scaleFactorX=1;
@@ -77,7 +78,8 @@ public class MainScene extends AbstractScene {
 		// Instantiate a new map with the default configuration (specify in a
 		// configuration file) and add it to the scene
 		try {
-			setMap(new Map(mtApplication, this, buffersize));
+                        //If encountered a heap of memory exception, set a lower buffer size
+			setMap(new Map(mtApplication, this, 1));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -86,7 +88,7 @@ public class MainScene extends AbstractScene {
 		// Instantiate the list of Layers
 		setLayerList(new LayerList(this, mtApplication));
 
-		// Instantiate a new temporal line and add it to the scene
+		// TODO Instantiate a new temporal line and add it to the scene
 		// temporalLine = new TemporalLine();
 		// this.getCanvas().addChild(temporalLine);
 
@@ -153,7 +155,6 @@ public class MainScene extends AbstractScene {
 				int i;
 				for (i=0; i<children.length; i++){
 					children[i].translate(vect);
-					System.out.println(vect);
 				}
 				map.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
 				vect.setX(0);
@@ -188,14 +189,10 @@ public class MainScene extends AbstractScene {
                         Vector3D tVect = new Vector3D((xdiff1-xdiff2)/scaleFactorX, (ydiff1-ydiff2)/scaleFactorY);
 			vect = vect.addLocal(tVect);
 			map.translateGlobal(tVect);
-			compteur++;
-			if (compteur>1){
+			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED){
                                 map.move(vect.x, vect.y);
-				map.scale(scaleFactorX,scaleFactorY,((ScaleEvent)gesture).getFirstCursor(),((ScaleEvent)gesture).getSecondCursor(), tVect);
-				compteur=0;
-				scaleFactorX=1;
-				scaleFactorY=1;
-			}
+				map.scale(scaleFactorX,scaleFactorY,((ScaleEvent)gesture).getFirstCursor(),((ScaleEvent)gesture).getSecondCursor());
+                        }
 			return false;
 		}
 	}
@@ -219,8 +216,9 @@ public class MainScene extends AbstractScene {
 				Vector3D vector = new Vector3D(gesture.getCursor().getStartPosX(), gesture.getCursor().getStartPosY());
 
 				//Get the informations about this position
-				String infos = map.getInfos(vector);
-				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
+				String infos = null;
+				infos = map.getInfos(vector);
+				Tooltip tooltip = new Tooltip(mtApplication, infos);
 				map.addChild(tooltip);
 				tooltip.setPositionGlobal(vector);
 			}

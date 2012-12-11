@@ -113,7 +113,7 @@ public class LayerList extends MTList{
 		this.setM(mainScene.getMap());
 
 		/* Creates Layer Panel */
-		MTRectangle layerPanel = new MTRectangle(mtApplication,0,0,240, 770);
+		MTRectangle layerPanel = new MTRectangle(mtApplication,0,0,240, mtApplication.height);
 		layerPanel.setFillColor(new MTColor(45,45,45,180));
 		layerPanel.setStrokeColor(new MTColor(45,45,45,180));
 		layerPanel.setPositionGlobal(new Vector3D(mtApplication.width/2f, mtApplication.height/2f));
@@ -229,7 +229,7 @@ public class LayerList extends MTList{
 
 	//  create a draggable Element of the list with a picture and a label
 	private LayerCell createListCell(ILayer layer, IFont font, float cellWidth, float cellHeight, final MTColor cellFillColor, MTApplication mtApplication){
-		final LayerCell cell = new LayerCell(layer, mtApplication, font, cellFillColor, cellWidth, cellHeight);
+		final LayerCell cell = new LayerCell(layer, mtApplication, font, cellFillColor, cellWidth, cellHeight, m);
 
 		cell.unregisterAllInputProcessors();
 		// We define here the gestures that work on our cells
@@ -257,11 +257,7 @@ public class LayerList extends MTList{
 					if(Math.abs(translationVectorInv.x) >= 150) {
 						if(!cell.isMapAlreadyInPlace()){
 							setNewColorTo(cell);
-							m.changeLayerState(cell.getLabel());
-
-							//m.addLayer(cell.getLayer()); (has to implement "setMapAlreadyInPlace(true);" )
-							// Until then ...
-							cell.setMapAlreadyInPlace(true);
+							cell.setMapAlreadyInPlace(m.changeLayerState(cell.getLabel()));
 						}
 					}
 					else {
@@ -290,19 +286,11 @@ public class LayerList extends MTList{
 				case TapAndHoldEvent.GESTURE_UPDATED:
 					break;
 				case TapAndHoldEvent.GESTURE_ENDED:
-					if(te.isHoldComplete()){
-						// System.out.println("Tap & Hold finished");
+					if(te.isHoldComplete() && cell.isMapAlreadyInPlace()){
 						cell.setActualColor(cellFillColor);
 						listUsedColors.remove(oldColor);
-						m.changeLayerState(cell.getLabel());
-						// m.removeLayer(cell.getLayer()); (has to implement "setMapAlreadyInPlace(false);" )
-						// Until then
-						cell.setMapAlreadyInPlace(false);
+						cell.setMapAlreadyInPlace(m.changeLayerState(cell.getLabel()));
 					}
-					else{
-						cell.setActualColor(oldColor);
-					}
-
 					break;
 				}
 				return false;

@@ -93,17 +93,17 @@ public class LayerCell extends MTListCell {
 	 * @param cellWidth : Width of the cell
 	 * @param cellHeight : Height of the cell
 	 */
-	public LayerCell(ILayer layer, MTApplication mtApplication, IFont font, final MTColor cellFillColor,float cellWidth, float cellHeight) {
+	public LayerCell(ILayer layer, MTApplication mtApplication, IFont font, final MTColor cellFillColor,float cellWidth, float cellHeight, Map map) {
 		super(mtApplication, cellWidth, cellHeight);
 		this.setLayer(layer);
 		
-		setMapAlreadyInPlace(false);
+		setMapAlreadyInPlace(layer.isVisible());
 		this.setChildClip(null); //FIXME TEST, no clipping for performance!
 
 		this.setFillColor(cellFillColor);
 		// Thumbnail is added here (now just a white rectangle)
 		MTRectangle thumbnail = new MTRectangle (mtApplication, 0,1,(int)(Math.floor(cellWidth)),(int)(Math.floor(0.70*cellHeight)) );
-		//thumbnail.setTexture(layer.getThumbnail());
+		thumbnail.setTexture(map.getThumbnail(layer));
 		this.addChild(thumbnail);
 
 		this.setLabel(layer.getName(), mtApplication, font);
