@@ -273,10 +273,10 @@ public class Map extends MTRectangle {
                 
                 Coordinate startCoord = convert(scalingPoint);
                 
-                float minX = (float) (startCoord.x - (startCoord.x - extent.getMinX())*scaleFactor);
-                float maxX = (float) (startCoord.x - (startCoord.x - extent.getMaxX())*scaleFactor);
-                float minY = (float) (startCoord.y - (startCoord.y - extent.getMinY())*scaleFactor);
-                float maxY = (float) (startCoord.y - (startCoord.y - extent.getMaxY())*scaleFactor);
+                float minX = (float) (startCoord.x - (startCoord.x - extent.getMinX())*scaleFactor*buffersize);
+                float maxX = (float) (startCoord.x - (startCoord.x - extent.getMaxX())*scaleFactor*buffersize);
+                float minY = (float) (startCoord.y - (startCoord.y - extent.getMinY())*scaleFactor*buffersize);
+                float maxY = (float) (startCoord.y - (startCoord.y - extent.getMaxY())*scaleFactor*buffersize);
                 
                 frame.mapTransform.setExtent( new Envelope(minX, maxX, minY, maxY));
         

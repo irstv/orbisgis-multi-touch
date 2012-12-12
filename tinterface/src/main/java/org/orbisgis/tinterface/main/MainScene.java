@@ -80,7 +80,7 @@ public class MainScene extends AbstractScene {
 		// configuration file) and add it to the scene
 		try {
                         //If encountered a heap of memory exception, set a lower buffer size
-			setMap(new Map(mtApplication, this, 1));
+			setMap(new Map(mtApplication, this, 3));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -183,8 +183,8 @@ public class MainScene extends AbstractScene {
                         
 			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED){
                                 float scaleFactor = mtApplication.width / map.getWidth();
-                                map.setHeightXYGlobal(mtApplication.height);
-                                map.setWidthXYGlobal(mtApplication.width);
+                                map.setHeightXYGlobal(mtApplication.height*map.buffersize);
+                                map.setWidthXYGlobal(mtApplication.width*map.buffersize);
                                 map.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
                                 
                                 map.scale(scaleFactor, gesture);
