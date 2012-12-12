@@ -197,10 +197,8 @@ public class LayerList extends MTList{
 					translationVectorInv.y = 0;
 					cell.translate(translationVectorInv);
 					if(Math.abs(translationVectorInv.x) >= 150) {
-						System.out.println(cell.isMapAlreadyInPlace());
 						if(!cell.isMapAlreadyInPlace()){
 							setNewColorTo(cell);
-							System.out.println("gefyreifbeyrgze");
 							cell.setMapAlreadyInPlace(m.changeLayerState(cell.getLabel()));
 						}
 					}
@@ -231,7 +229,6 @@ public class LayerList extends MTList{
 					break;
 				case TapAndHoldEvent.GESTURE_ENDED:
 					if(te.isHoldComplete() && cell.isMapAlreadyInPlace()){
-						// System.out.println("Tap & Hold finished");
 						cell.setActualColor(cellFillColor);
 						listUsedColors.remove(oldColor);
 						cell.setMapAlreadyInPlace(m.changeLayerState(cell.getLabel()));

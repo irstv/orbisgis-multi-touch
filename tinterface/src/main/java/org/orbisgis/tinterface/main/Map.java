@@ -42,6 +42,7 @@ public class Map extends MTRectangle {
 	public final MainFrame frame;
 	public final MapContext mapContext;
 	public MTApplication mtApplication;
+	public float buffersize;
 	
 	public Map(MTApplication mtApplication, MainScene mainScene, float buffersize)
 			throws Exception {
@@ -49,6 +50,7 @@ public class Map extends MTRectangle {
 		this.setNoStroke(true);
 		this.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
 		this.mtApplication=mtApplication;
+		this.buffersize = buffersize;
 		this.unregisterAllInputProcessors();
 		this.removeAllGestureEventListeners();
 
@@ -68,11 +70,6 @@ public class Map extends MTRectangle {
 					extent.getMinY() - facteur*extent.getHeight(), extent.getMaxY() + facteur*extent.getHeight()));
 	
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
-        int i;
-        for (i=0;i<mapContext.getLayers().length;i++){
-        	System.out.println(mapContext.getLayers()[i].getName());
-        }
-
 
 		BufferedImage im = frame.mapTransform.getImage();
 		PImage image = new PImage(im);
@@ -116,74 +113,92 @@ public class Map extends MTRectangle {
 
 	/**
 	 * This function get the informations corresponding the the position of the input vector
-	 * @param vector the vector corresponding the the position
+	 * @param vector the vector corresponding to the position
 	 * @return the information about this position (String)
-	 * @throws DriverException 
-	 * @throws ParseException 
-	 * @throws DataSourceCreationException 
 	 */
-	public String getInfos(Vector3D vector, float buffersize) throws DriverException, DataSourceCreationException, ParseException {
-		ILayer layer = mapContext.getLayers()[2];
-		DataSource sds = layer.getDataSource();
-		Envelope extent = frame.mapTransform.getExtent();
-		String sql = null;
+	public String getInfos(Vector3D vector){
+		String information = "";
 		GeometryFactory gf = new GeometryFactory();
-		double minx = extent.getMinX()+(vector.getX()-10+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
-		double miny = extent.getMinY()+(mtApplication.height-10-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
-		double maxx = extent.getMinX()+(vector.getX()+10+mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
-		double maxy = extent.getMinY()+(mtApplication.height-vector.getY()+10+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
+		int i=0;
+			
+		//Create a square of 20 pixels around the touched point
+		Coordinate lowerLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()+10));
+		Coordinate upperRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()-10));
+		Coordinate lowerRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()+10));
+		Coordinate upperLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()-10));
 
-		Coordinate lowerLeft = new Coordinate(minx, miny);
-		Coordinate upperRight = new Coordinate(maxx, maxy);
 		LinearRing envelopeShell = gf.createLinearRing(new Coordinate[] {
-		lowerLeft, new Coordinate(minx, maxy), upperRight,
-		new Coordinate(maxx, miny), lowerLeft, });
+				lowerLeft, upperLeft, upperRight, lowerRight, lowerLeft, });
 		Geometry geomEnvelope = gf.createPolygon(envelopeShell,
-		new LinearRing[0]);
-		WKTWriter writer = new WKTWriter();
-		sql = "select * from " + layer.getName() + " where ST_intersects("
-		+ sds.getMetadata().getFieldName(sds.getSpatialFieldIndex()) + ", ST_geomfromtext('"
-		+ writer.write(geomEnvelope) + "'));";
-		DataSource sds2 = ((DataManager) Services
-				.getService(DataManager.class)).getDataSourceFactory()
-				.getDataSourceFromSQL(sql);
-		sds2.open();
-		int i;
-		String result = "";
-		System.out.println("Nb lignes : "+sds2.getRowCount());
-		switch ((int)(sds2.getRowCount())){
-		case 0 :
-			result = "No Information Available";
-			break;
-		case 1 : 			
-			for (i=1;i<sds2.getFieldCount();i++){
-				result = result + sds2.getFieldName(i)+" : "+sds2.getFieldValue(0, i).toString()+"\n";
-			};
-			break;
-		default : result = "Zoom to have more precise informations"; break;
+				new LinearRing[0]);
+		
+		//Look for information in all the visible layers (stop when information is found)
+		while ((information.equals("")) && i<mapContext.getLayers().length){
+			if (mapContext.getLayers()[i].isVisible()){
+				information=getInfos(mapContext.getLayers()[i], geomEnvelope);
+			}
+			i++;
 		}
-
-		return result;
-//		} catch (DriverLoadException e) {
-//			throw new RuntimeException(e);
-////		} catch (DataSourceCreationException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-//		} catch (DriverException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-////		} catch (ParseException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-//		}
-////				try {
-////				Services.getService(InformationManager.class)
-////				.setContents(ds);
-////				} catch (DriverException e) {
-////				Services.getErrorManager().error(
-////				"Cannot show the data", e);
-////				}
-
+		
+		//If no information was found, we return this message
+		if (information.equals("")){
+			information = "No Information Available";
+		}
+		
+		//Return the string (without the last \n)
+		return information.trim();
+	}
+	
+	/**
+	 * This method return the information present in the layer and the square in parameter 
+	 * @param layer the layer in which we look for information
+	 * @param geomEnvelope the square in which to look
+	 * @return the information
+	 */
+	public String getInfos(ILayer layer, Geometry geomEnvelope){
+		String information = "";
+		int i;
+		String sql = null;
+		System.out.println(layer.getName());
+		try{
+			DataSource dataSourceInitial = layer.getDataSource();
+					
+			//Get the DataSource corresponding to the square in dataSourceSquare
+			WKTWriter writer = new WKTWriter();
+			sql = "select * from " + layer.getName() + " where ST_intersects("
+					+ dataSourceInitial.getMetadata().getFieldName(dataSourceInitial.getSpatialFieldIndex()) + ", ST_geomfromtext('"
+					+ writer.write(geomEnvelope) + "'));";
+			DataSource dataSourceSquare = ((DataManager) Services
+					.getService(DataManager.class)).getDataSourceFactory()
+					.getDataSourceFromSQL(sql);
+			dataSourceSquare.open();
+			
+			//Put the information from dataSourceSquare in the variable if only one line match the touched rectangle
+			switch ((int)(dataSourceSquare.getRowCount())){
+			case 0 :
+				information = "";
+				break;
+			case 1 : 			
+				for (i=1;i<dataSourceSquare.getFieldCount();i++){
+					information = information + dataSourceSquare.getFieldName(i)+" : "+dataSourceSquare.getFieldValue(0, i).toString()+"\n";
+				};
+				break;
+			default : information = "Zoom to have more precise informations"; break;
+			}
+		} catch (DriverLoadException e) {
+			throw new RuntimeException(e);
+		} catch (DataSourceCreationException e) {
+			e.printStackTrace();
+			information = "No Information Available";
+		} catch (DriverException e) {
+			e.printStackTrace();
+			information = "No Information Available";
+		} catch (ParseException e) {
+			e.printStackTrace();
+			information = "No Information Available";
+		}
+		
+		return information;
 	}
 
 	public PImage getThumbnail() {
@@ -230,5 +245,20 @@ public class Map extends MTRectangle {
 		this.setTexture(image);
 		
 		return visible;
+	}
+	
+	/**
+	 * This method return the coordinate corresponding to the point of the screen (in pixels) in parameter
+	 * @param vector the point in pixel
+	 * @return coord the corresponding coordinate
+	 */
+	public Coordinate convert(Vector3D vector){
+		Envelope extent = frame.mapTransform.getExtent();
+		
+		double x = extent.getMinX()+(vector.getX() + mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
+		double y = extent.getMinY()+(mtApplication.height-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
+
+		Coordinate coord = new Coordinate(x, y);
+		return coord;
 	}
 }

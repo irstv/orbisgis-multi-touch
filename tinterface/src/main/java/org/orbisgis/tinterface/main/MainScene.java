@@ -48,7 +48,6 @@ public class MainScene extends AbstractScene {
 	private Vector3D vect;
 	private float scaleFactorX;
 	private float scaleFactorY;
-	private float buffersize;
 
 	/**
 	 * The temporal line
@@ -68,7 +67,6 @@ public class MainScene extends AbstractScene {
 		
 		this.mtApplication = mtApplication;
 
-		buffersize = 3;
 		compteur =0;
 		vect = new Vector3D(0, 0);
 		scaleFactorX=1;
@@ -79,7 +77,7 @@ public class MainScene extends AbstractScene {
 		// Instantiate a new map with the default configuration (specify in a
 		// configuration file) and add it to the scene
 		try {
-			setMap(new Map(mtApplication, this, buffersize));
+			setMap(new Map(mtApplication, this, 3));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -211,21 +209,8 @@ public class MainScene extends AbstractScene {
 
 				//Get the informations about this position
 				String infos = null;
-				try {
-					try {
-						infos = map.getInfos(vector, buffersize);
-					} catch (DataSourceCreationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				} catch (DriverException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				Tooltip tooltip = new Tooltip(mtApplication, vector, infos);
+				infos = map.getInfos(vector);
+				Tooltip tooltip = new Tooltip(mtApplication, infos);
 				map.addChild(tooltip);
 				tooltip.setPositionGlobal(vector);
 			}
