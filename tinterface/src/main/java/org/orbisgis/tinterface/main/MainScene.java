@@ -1,5 +1,6 @@
 package org.orbisgis.tinterface.main;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import java.awt.Window;
 
 import org.gdms.data.DataSourceCreationException;
@@ -178,20 +179,15 @@ public class MainScene extends AbstractScene {
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
 			// Scale the map
-			scaleFactorX=scaleFactorX*((ScaleEvent) gesture).getScaleFactorX();
-			scaleFactorY=scaleFactorY*((ScaleEvent) gesture).getScaleFactorY();
-                        InputCursor firstCursor = ((ScaleEvent) gesture).getFirstCursor();
-                        InputCursor secondCursor = ((ScaleEvent) gesture).getSecondCursor();
-                        float xdiff1 = firstCursor.getCurrentEvtPosX() - firstCursor.getStartPosX();
-                        float ydiff1 = firstCursor.getCurrentEvtPosY() - firstCursor.getStartPosY();
-                        float xdiff2 = secondCursor.getCurrentEvtPosX() - secondCursor.getStartPosX();
-                        float ydiff2 = secondCursor.getCurrentEvtPosY() - secondCursor.getStartPosY();
-                        Vector3D tVect = new Vector3D((xdiff1-xdiff2)/scaleFactorX, (ydiff1-ydiff2)/scaleFactorY);
-			vect = vect.addLocal(tVect);
-			map.translateGlobal(tVect);
+			map.scaleGlobal(((ScaleEvent) gesture).getScaleFactorX(), ((ScaleEvent) gesture).getScaleFactorY(), ((ScaleEvent) gesture).getScaleFactorZ(), ((ScaleEvent) gesture).getScalingPoint());
+                        
 			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED){
-                                map.move(vect.x, vect.y);
-				map.scale(scaleFactorX,scaleFactorY,((ScaleEvent)gesture).getFirstCursor(),((ScaleEvent)gesture).getSecondCursor());
+                                float scaleFactor = mtApplication.width / map.getWidth();
+                                map.setHeightXYGlobal(mtApplication.height);
+                                map.setWidthXYGlobal(mtApplication.width);
+                                map.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
+                                
+                                map.scale(scaleFactor, gesture);
                         }
 			return false;
 		}

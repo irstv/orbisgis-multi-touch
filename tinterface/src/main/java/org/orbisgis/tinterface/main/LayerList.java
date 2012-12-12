@@ -327,8 +327,6 @@ public class LayerList extends MTList{
 			cell.setLabel(cell.getLabel()+"(randomColor)");
 		}
 		
-		System.out.println("nb Couleurs (BIZARRE) : "+this.getListColors().size());
-		System.out.println("nb couleurs utilisees : "+this.getListUsedColors().size());
 		
 		cell.setActualColor(newColor);
 		listUsedColors.add(newColor);

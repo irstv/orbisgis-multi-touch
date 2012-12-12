@@ -30,6 +30,10 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.io.WKTWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.mt4j.input.inputProcessors.MTGestureEvent;
+import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleEvent;
 
 import processing.core.PImage;
 
@@ -194,50 +198,68 @@ public class Map extends MTRectangle {
 
 
     public PImage getThumbnail(ILayer layer) {
-        frame.mapTransform.setExtent(layer.getEnvelope());
+            
+        Envelope startExtent = frame.mapTransform.getExtent();
+            
+        ILayer[] layers = mapContext.getLayers();
+        
+        Boolean[] layerState = new Boolean[layers.length];
+        
+        for (int i=0; i < layers.length; i++) {
+                layerState[i] = layers[i].isVisible();
+                if (layer == layers[i]) {
+                        frame.mapTransform.setExtent(layers[i].getEnvelope());
+                        try {
+                                layers[i].setVisible(true);
+                        } catch (LayerException ex) {
+                        }
+                } else {
+                        try {
+                                layers[i].setVisible(false);
+                        } catch (LayerException ex) {
+                        }
+                }
+        }
+        
+        frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
         mapContext.draw(frame.mapTransform, new NullProgressMonitor(), layer);
         BufferedImage im = frame.mapTransform.getImage();
         PImage image = new PImage(im);
+        
+        for (int i=0; i < layers.length; i++) {
+                    try {
+                            layers[i].setVisible(layerState[i]);
+                    } catch (LayerException ex) {
+                    }
+        }
+        
+        frame.mapTransform.setExtent(startExtent);
         return image;
     }
 
-    public void scale(float scaleFactorX, float scaleFactorY, InputCursor c1, InputCursor c2) {
+    public void scale(float scaleFactor, MTGestureEvent gesture) {
         Envelope extent = frame.mapTransform.getExtent();
                 //System.out.println("xmoy : " + xmoy + "\nxdecal : " + xdecal + "\nminx de base : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth())) + "\nminx : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth()) + xdecal));
                 //sframe.mapTransform.setExtent(new Envelope(c1., scaleFactorY, scaleFactorY, scaleFactorY));
                 System.out.println(frame.mapTransform.getExtent());
                 //Getting the start coordinates of the zoom center
-                Vector3D vec1Start = new Vector3D(c1.getStartPosX(), c1.getStartPosY());
-                Coordinate coord1Start = convert(vec1Start);
+                Vector3D scalingPoint = ((ScaleEvent) gesture).getScalingPoint();
                 
-                Vector3D vec2Start = new Vector3D(c2.getStartPosX(), c2.getStartPosY());
-                Coordinate coord2Start = convert(vec2Start);
+                Coordinate startCoord = convert(scalingPoint);
                 
-                Coordinate centerStart = new Coordinate((coord1Start.x + coord2Start.x)/2, (coord1Start.y + coord2Start.y)/2);
+                float minX = (float) (startCoord.x - (startCoord.x - extent.getMinX())*scaleFactor);
+                float maxX = (float) (startCoord.x - (startCoord.x - extent.getMaxX())*scaleFactor);
+                float minY = (float) (startCoord.y - (startCoord.y - extent.getMinY())*scaleFactor);
+                float maxY = (float) (startCoord.y - (startCoord.y - extent.getMaxY())*scaleFactor);
                 
-                //Getting the end coordinates of the zoom center
-                Vector3D vec1End = new Vector3D(c1.getCurrentEvtPosX(), c1.getCurrentEvtPosY());
-                Coordinate coord1End = convert(vec1End);
-                
-                Vector3D vec2End = new Vector3D(c2.getCurrentEvtPosX(), c2.getCurrentEvtPosY());
-                Coordinate coord2End = convert(vec2End);
-                
-                Coordinate centerEnd = new Coordinate((coord1Start.x + coord2Start.x)/2, (coord1Start.y + coord2Start.y)/2);
-                
-                float scaleFactor = (float) Math.sqrt(Math.pow(scaleFactorX, 2)+Math.pow(scaleFactorY, 2));
-                
-                float minX = (float) (centerEnd.x - (centerStart.x - extent.getMinX())*scaleFactor);
-                float maxX = (float) ((extent.getMaxX() - centerStart.x)*scaleFactor + centerEnd.x);
-                float minY = (float) (centerEnd.y - (centerStart.y - extent.getMinY())*scaleFactor);
-                float maxY = (float) ((extent.getMaxY() - centerStart.y)*scaleFactor + centerEnd.y);
-                
-                frame.mapTransform.setExtent( new Envelope(minX, minY, maxX, maxY));
+                frame.mapTransform.setExtent( new Envelope(minX, maxX, minY, maxY));
         
                 frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
                 mapContext.draw(frame.mapTransform, new NullProgressMonitor());
                 System.out.println(frame.mapTransform.getExtent());
                 BufferedImage im = frame.mapTransform.getImage();
                 PImage image = new PImage(im);
+                
                 this.setTexture(image);	
 	}
 
@@ -282,5 +304,13 @@ public class Map extends MTRectangle {
 		Coordinate coord = new Coordinate(x, y);
 		return coord;
 	}
+        
+        public float getWidth() {
+                return super.getWidthXYGlobal();
+        }
+
+        float getHeight() {
+                return super.getHeightXYGlobal();
+        }
 
 }
