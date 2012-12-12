@@ -12,7 +12,7 @@ import org.orbisgis.core.layerModel.ILayer;
 
 /**
  * Cell of the LayerList that has the properties of a MTListCell and new attributes and methods to link the cell with a layer
- * @author Adri
+ * @author Adrien
  *
  */
 public class LayerCell extends MTListCell {
@@ -20,16 +20,23 @@ public class LayerCell extends MTListCell {
 	private boolean mapAlreadyInPlace;
 	
 	/** the Map/Layer */
-	ILayer layer;
+	private ILayer layer;
 
 	/** the Thumbnail */
-	MTRectangle thumbnail;
+	private MTRectangle thumbnail;
 	
 	/** the Label */
-	String label;
+	private String label;
 	
 	/** The actual color  */
-	MTColor actualColor = this.getFillColor();	
+	private MTColor actualColor = this.getFillColor();
+	
+	/** The width */
+	private float width;
+	
+	public float getWidth() {
+		return width;
+	}
 	
 	public boolean isMapAlreadyInPlace() {
 		return mapAlreadyInPlace;
@@ -38,24 +45,12 @@ public class LayerCell extends MTListCell {
 		this.mapAlreadyInPlace = mapAlreadyInPlace;
 	}
 	
-	public ILayer getLayer() {
-		return layer;
-	}
-	public void setLayer(ILayer layer) {
-		this.layer = layer;
-	}
-
 	public String getLabel() {
 		return label;
 	}
-	public void setLabel(String label) {
-		this.label = label;
-	}
+	// Only for initialization
 	public void setLabel(String label, MTApplication mtApplication, IFont font) {
 		this.label = label;
-		
-		// TODO : Find a way to get the Label Child 
-		//this.removeChild(1);
 		
 		// Label is initialized here ..
 		MTTextArea listLabel = new MTTextArea(mtApplication, font);
@@ -63,40 +58,35 @@ public class LayerCell extends MTListCell {
 		listLabel.setNoStroke(true);
 		listLabel.setText(label);
 		Vector3D positionText = this.getCenterPointLocal();
-		positionText.y +=30; 
+		positionText.y +=40; 
 		listLabel.setPositionRelativeToParent(positionText);
 		// .. and added here
 		this.addChild(listLabel);
 		
 	}
 	
-	public MTRectangle getThumbnail() {
-		return thumbnail;
-	}
 	public void setThumbnail(MTImage thumbnail) {
 		this.thumbnail = thumbnail;
 	}
 
-	public MTColor getActualColor() {
-		return actualColor;
-	}
 	public void setActualColor(MTColor actualColor) {
 		this.setFillColor(actualColor);
 		this.actualColor = actualColor;
 	}
 
 	/**
-	 * Constructor of our LayerCell 
+	 *  Constructor of our LayerCell 
 	 * @param mtApplication
 	 * @param font : font to write the label
 	 * @param cellFillColor : default color of the cell
 	 * @param cellWidth : Width of the cell
 	 * @param cellHeight : Height of the cell
+	 * @param layer : layer that the cell represents
 	 */
 	public LayerCell(ILayer layer, MTApplication mtApplication, IFont font, final MTColor cellFillColor,float cellWidth, float cellHeight, Map map) {
 		super(mtApplication, cellWidth, cellHeight);
-		this.setLayer(layer);
-		
+		this.layer = layer;
+		this.width = cellWidth;
 		setMapAlreadyInPlace(layer.isVisible());
 		this.setChildClip(null); //FIXME TEST, no clipping for performance!
 
@@ -106,7 +96,9 @@ public class LayerCell extends MTListCell {
 		thumbnail.setTexture(map.getThumbnail(layer));
 		this.addChild(thumbnail);
 
-		this.setLabel(layer.getName(), mtApplication, font);
+		this.setLabel(this.layer.getName(), mtApplication, font);
 	}
+	
+	
 
 }

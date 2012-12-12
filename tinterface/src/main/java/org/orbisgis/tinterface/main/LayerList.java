@@ -23,7 +23,6 @@ import org.mt4j.util.font.FontManager;
 import org.mt4j.util.font.IFont;
 import org.mt4j.util.math.Vector3D;
 import org.orbisgis.core.layerModel.ILayer;
-import org.orbisgis.core.layerModel.LayerException;
 
 public class LayerList extends MTList{
 
@@ -33,19 +32,6 @@ public class LayerList extends MTList{
 	/** The list of colors */
 	protected LinkedList<MTColor> listColors;
 	protected LinkedList<MTColor> listUsedColors;
-	
-	/** The list of Layers that we could add/delete */
-	protected LinkedList<Map> listOfLayers;
-	
-	/** The list of Layers already in place */
-	protected LinkedList<Map> listOfLayersInPlace;
-	
-	public Map getM() {
-		return m;
-	}
-	public void setM(Map m) {
-		this.m = m;
-	}
 
 	public LinkedList<MTColor> getListColors() {
 		return listColors;
@@ -61,47 +47,6 @@ public class LayerList extends MTList{
 		this.listUsedColors = listUsedColors;
 	}
 	
-	public LinkedList<Map> getListOfLayers() {
-		return listOfLayers;
-	}
-	public void setListOfLayers(LinkedList<Map> listOfLayers) {
-		this.listOfLayers = listOfLayers;
-	}
-	
-	public LinkedList<Map> getListOfLayersInPlace() {
-		return listOfLayersInPlace;
-	}
-	public void setListOfLayersInPlace(LinkedList<Map> listOfLayersInPlace) {
-		this.listOfLayersInPlace = listOfLayersInPlace;
-	}
-	
-	/** 
-	 * "Constructor-like" method to create and initialize the ListOfLayers
-	 * @return : List of Layers initialized
-	 */
-	public LinkedList<Map> ListOfLayers(){
-		LinkedList<Map> tempList = new LinkedList<Map>();
-		Map mTemp = getM();
-		// Lire dans un fichier/dans les ressources toutes les cartes qu'on pourra utiliser
-		for(int i=0;i<10;i++){
-			mTemp.setName("Element "+i);
-			tempList.add(mTemp);
-		}
-		
-		return tempList;
-	}
-	
-	/** 
-	 * "Constructor-like" method to create and initialize the ListOfLayers
-	 * @return : List of Layers initialized
-	 */
-	public LinkedList<Map> ListOfLayersInPlace(){
-		LinkedList<Map> tempList = new LinkedList<Map>();
-		
-		// Lire dans un fichier/dans les ressources les cartes � charger au d�marrage
-		
-		return tempList;
-	}
 	/**
 	 * Constructor of the list
 	 * @param mainScene
@@ -110,14 +55,23 @@ public class LayerList extends MTList{
 	public LayerList(MainScene mainScene, MTApplication mtApplication){
 
 		super(mtApplication,0, 0, 152, mtApplication.getHeight()); 
-		this.setM(mainScene.getMap());
+		this.m = mainScene.getMap();
 
+		/* We get the maximum of the numbers of characters (if >15) of the labels of the layers to define the width of the cell and the panel */
+		int maxCharactersNumber=15;
+		for(ILayer layers:m.mapContext.getLayers()){
+			if(layers.getName().length()>maxCharactersNumber){
+				maxCharactersNumber = layers.getName().length();
+			}
+		}
+		float cellWidth=Math.max((int)(maxCharactersNumber*8.5), 150);
+		
 		/* Creates Layer Panel */
-		MTRectangle layerPanel = new MTRectangle(mtApplication,0,0,240, mtApplication.height);
+		MTRectangle layerPanel = new MTRectangle(mtApplication,0,0,cellWidth+150, mtApplication.height);
 		layerPanel.setFillColor(new MTColor(45,45,45,180));
 		layerPanel.setStrokeColor(new MTColor(45,45,45,180));
 		layerPanel.setPositionGlobal(new Vector3D(mtApplication.width/2f, mtApplication.height/2f));
-		layerPanel.translateGlobal(new Vector3D(-mtApplication.width/2f - 80,0)); // Initializations position of the menu
+		layerPanel.translateGlobal(new Vector3D(-mtApplication.width/2f - 2*cellWidth/3,0)); // Initializations position of the menu
 		mainScene.getCanvas().addChild(layerPanel);
 
 		/* Initialization of our LayerList itself */
@@ -128,25 +82,21 @@ public class LayerList extends MTList{
 		this.setAnchor(PositionAnchor.CENTER);
 		this.setPositionRelativeToParent(layerPanel.getCenterPointLocal());
 		layerPanel.addChild(this);
-		
-		/* Initialization of the lists of Layers */
-		this.listOfLayers = ListOfLayers();
-		this.listOfLayersInPlace = ListOfLayersInPlace();
 
-		/* Initialize the settings to generate the cells */
-		float cellWidth = 155, cellHeight = 90; 
+		/* Initialization of the settings to generate the cells with the proportions of the mtApplication */
+		float cellHeight =(((float)mtApplication.getHeight()/mtApplication.getWidth())*cellWidth); 
 		MTColor cellFillColor = new MTColor(new MTColor(0,0,0,210));
 		IFont font = FontManager.getInstance().createFont(mtApplication, "SansSerif.Bold", 15, MTColor.WHITE);
 		
-		// To define the number of colors/cells to create, we need
-		int nbCells = this.getListOfLayers().size();
+		// To define the number of colors/cells to create, we need to get the number of layers that will fit in the list
+		int nbCells = m.mapContext.getLayers().length;
 		
 		// Initialization of the lists of colors 
 		this.listColors = new LinkedList<MTColor>();
 		int baseIntColor = 255;
-		int nbLoops =(int)(Math.floor(nbCells/7));
+		int nbLoops =(int)(Math.floor(nbCells/7))+1;
 		int intColorLoop = 0;
-		
+		// We create 7 colors per loop (distributed in the scope of colors)
 		for(int i=0;i<nbLoops ;i++) {
 			intColorLoop = baseIntColor/nbLoops-baseIntColor*i/nbLoops;
 			listColors.add(new MTColor(intColorLoop,0,0,210));
@@ -155,24 +105,27 @@ public class LayerList extends MTList{
 			listColors.add(new MTColor(intColorLoop,intColorLoop,0,210));
 			listColors.add(new MTColor(0,intColorLoop,intColorLoop,210));
 			listColors.add(new MTColor(intColorLoop,0,intColorLoop,210));
-			listColors.add(new MTColor(intColorLoop,intColorLoop,intColorLoop,210));
+			listColors.add(new MTColor((int)Math.abs(intColorLoop-50),(int)Math.abs(intColorLoop-50),(int)Math.abs(intColorLoop-50),210));
 		}
 		
 		this.listUsedColors = new LinkedList<MTColor>();
 		
 		/* Generation of the cells */
 		LayerCell cellCreated = null;
-		for(ILayer mPossible:m.mapContext.getLayers()) {
-			cellCreated = this.createListCell(mPossible, font, cellWidth, cellHeight, cellFillColor, mtApplication);
+		for(ILayer layerPossible:m.mapContext.getLayers()) {
+			// We create the cell
+			cellCreated = this.createListCell(layerPossible, font, cellWidth, cellHeight, cellFillColor, mtApplication);
 			
-			if(mPossible.isVisible()){
+			//  If it is displayed at start : we color this cell
+			if(layerPossible.isVisible()){
 				setNewColorTo(cellCreated);
-			}
+			} 
+			// We add the cell to the list
 			this.addListElement(cellCreated);
 		}
 				
 		// Slide out animation
-		final IAnimation slideOut = new AniAnimation(0, 170, 700, AniAnimation.BACK_OUT, layerPanel);
+		final IAnimation slideOut = new AniAnimation(-10, cellWidth, 700, AniAnimation.BACK_OUT, layerPanel);
 		slideOut.addAnimationListener(new IAnimationListener() {
 			public void processAnimationEvent(AnimationEvent ae) {
 				float delta = ae.getDelta();
@@ -187,7 +140,7 @@ public class LayerList extends MTList{
 		});
 
 		// SlideIn Animation
-		final IAnimation slideIn = new AniAnimation(0, 170, 700, AniAnimation.BACK_OUT, layerPanel);
+		final IAnimation slideIn = new AniAnimation(-10, cellWidth, 700, AniAnimation.BACK_OUT, layerPanel);
 		slideIn.addAnimationListener(new IAnimationListener() {
 			public void processAnimationEvent(AnimationEvent ae) {
 				float delta = -ae.getDelta();
@@ -251,7 +204,7 @@ public class LayerList extends MTList{
 					break;
 				case DragEvent.GESTURE_ENDED:
 					Vector3D translationVectorInv = new Vector3D(cell.getCenterPointGlobal());
-					translationVectorInv.x = -translationVectorInv.x+93;
+					translationVectorInv.x = -translationVectorInv.x+cell.getWidth()/2;
 					translationVectorInv.y = 0;
 					cell.translate(translationVectorInv);
 					if(Math.abs(translationVectorInv.x) >= 150) {
@@ -302,7 +255,7 @@ public class LayerList extends MTList{
 	
 	/**
 	 * Method that allows to set a new color to a cell
-	 * @param cell : cell which the color has to be changed
+	 * @param cell : cell for which the color has to be changed
 	 */
 	public void setNewColorTo(LayerCell cell){
 		// Default Color
@@ -324,9 +277,7 @@ public class LayerList extends MTList{
 		}
 		else {
 			newColor = new MTColor((int)Math.floor(Math.random()*255),(int)Math.floor(Math.random()*255),(int)Math.floor(Math.random()*255),180);
-			cell.setLabel(cell.getLabel()+"(randomColor)");
 		}
-		
 		
 		cell.setActualColor(newColor);
 		listUsedColors.add(newColor);
