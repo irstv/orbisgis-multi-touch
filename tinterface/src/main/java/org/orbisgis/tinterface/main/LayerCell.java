@@ -58,7 +58,7 @@ public class LayerCell extends MTListCell {
 		listLabel.setNoStroke(true);
 		listLabel.setText(label);
 		Vector3D positionText = this.getCenterPointLocal();
-		positionText.y +=40; 
+		positionText.y +=(((float)mtApplication.getHeight()/mtApplication.getWidth())*this.width)/2; 
 		listLabel.setPositionRelativeToParent(positionText);
 		// .. and added here
 		this.addChild(listLabel);
@@ -92,8 +92,9 @@ public class LayerCell extends MTListCell {
 
 		this.setFillColor(cellFillColor);
 		// Thumbnail is added here (now just a white rectangle)
-		MTRectangle thumbnail = new MTRectangle (mtApplication, 0,1,(int)(Math.floor(cellWidth)),(int)(Math.floor(0.70*cellHeight)) );
+		MTRectangle thumbnail = new MTRectangle (mtApplication, 0,1,(int)(Math.floor(cellWidth)),((float)mtApplication.getHeight()/mtApplication.getWidth())*cellWidth);
 		thumbnail.setTexture(map.getThumbnail(layer));
+		thumbnail.setStrokeWeight(0);
 		this.addChild(thumbnail);
 
 		this.setLabel(this.layer.getName(), mtApplication, font);

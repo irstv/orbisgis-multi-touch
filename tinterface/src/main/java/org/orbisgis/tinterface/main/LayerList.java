@@ -67,11 +67,12 @@ public class LayerList extends MTList{
 		float cellWidth=Math.max((int)(maxCharactersNumber*8.5), 150);
 		
 		/* Creates Layer Panel */
-		MTRectangle layerPanel = new MTRectangle(mtApplication,0,0,cellWidth+150, mtApplication.height);
+		int marginLeftPanelList = 100, marginListCell = 20;
+		MTRectangle layerPanel = new MTRectangle(mtApplication,0,0,cellWidth+marginLeftPanelList, mtApplication.height);
 		layerPanel.setFillColor(new MTColor(45,45,45,180));
 		layerPanel.setStrokeColor(new MTColor(45,45,45,180));
-		layerPanel.setPositionGlobal(new Vector3D(mtApplication.width/2f, mtApplication.height/2f));
-		layerPanel.translateGlobal(new Vector3D(-mtApplication.width/2f - 2*cellWidth/3,0)); // Initializations position of the menu
+		layerPanel.setPositionGlobal(new Vector3D(cellWidth/2f+marginLeftPanelList/2, mtApplication.height/2f));
+		layerPanel.translateGlobal(new Vector3D(-cellWidth-marginListCell,0)); // Initializations position of the menu
 		mainScene.getCanvas().addChild(layerPanel);
 
 		/* Initialization of our LayerList itself */
@@ -79,13 +80,13 @@ public class LayerList extends MTList{
 		this.setNoFill(true);
 		this.setNoStroke(true);
 		this.unregisterAllInputProcessors();
-		this.setAnchor(PositionAnchor.CENTER);
-		this.setPositionRelativeToParent(layerPanel.getCenterPointLocal());
+		this.setAnchor(PositionAnchor.UPPER_LEFT);
+		this.setPositionRelativeToParent(new Vector3D(marginListCell,0));
 		layerPanel.addChild(this);
 
 		/* Initialization of the settings to generate the cells with the proportions of the mtApplication */
-		float cellHeight =(((float)mtApplication.getHeight()/mtApplication.getWidth())*cellWidth); 
-		MTColor cellFillColor = new MTColor(new MTColor(0,0,0,210));
+		float cellHeight =(((float)mtApplication.getHeight()/mtApplication.getWidth())*cellWidth+40); 
+		MTColor cellFillColor = new MTColor(new MTColor(45,45,45,180));
 		IFont font = FontManager.getInstance().createFont(mtApplication, "SansSerif.Bold", 15, MTColor.WHITE);
 		
 		// To define the number of colors/cells to create, we need to get the number of layers that will fit in the list
@@ -105,7 +106,7 @@ public class LayerList extends MTList{
 			listColors.add(new MTColor(intColorLoop,intColorLoop,0,210));
 			listColors.add(new MTColor(0,intColorLoop,intColorLoop,210));
 			listColors.add(new MTColor(intColorLoop,0,intColorLoop,210));
-			listColors.add(new MTColor((int)Math.abs(intColorLoop-50),(int)Math.abs(intColorLoop-50),(int)Math.abs(intColorLoop-50),210));
+			listColors.add(new MTColor((int)Math.abs(intColorLoop-20),(int)Math.abs(intColorLoop-20),(int)Math.abs(intColorLoop-20),210));
 		}
 		
 		this.listUsedColors = new LinkedList<MTColor>();
@@ -125,7 +126,7 @@ public class LayerList extends MTList{
 		}
 				
 		// Slide out animation
-		final IAnimation slideOut = new AniAnimation(-10, cellWidth, 700, AniAnimation.BACK_OUT, layerPanel);
+		final IAnimation slideOut = new AniAnimation(0, cellWidth, 700, AniAnimation.BACK_OUT, layerPanel);
 		slideOut.addAnimationListener(new IAnimationListener() {
 			public void processAnimationEvent(AnimationEvent ae) {
 				float delta = ae.getDelta();
@@ -140,7 +141,7 @@ public class LayerList extends MTList{
 		});
 
 		// SlideIn Animation
-		final IAnimation slideIn = new AniAnimation(-10, cellWidth, 700, AniAnimation.BACK_OUT, layerPanel);
+		final IAnimation slideIn = new AniAnimation(0, cellWidth, 700, AniAnimation.BACK_OUT, layerPanel);
 		slideIn.addAnimationListener(new IAnimationListener() {
 			public void processAnimationEvent(AnimationEvent ae) {
 				float delta = -ae.getDelta();
