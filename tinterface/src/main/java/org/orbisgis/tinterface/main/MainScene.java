@@ -1,5 +1,6 @@
 package org.orbisgis.tinterface.main;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import java.awt.Window;
 
 import org.gdms.data.DataSourceCreationException;
@@ -8,6 +9,7 @@ import org.gdms.sql.engine.ParseException;
 import org.mt4j.MTApplication;
 import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
+import org.mt4j.input.inputData.InputCursor;
 import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragEvent;
@@ -77,7 +79,8 @@ public class MainScene extends AbstractScene {
 		// Instantiate a new map with the default configuration (specify in a
 		// configuration file) and add it to the scene
 		try {
-			setMap(new Map(mtApplication, this, 3));
+                        //If encountered a heap of memory exception, set a lower buffer size
+			setMap(new Map(mtApplication, this, 1));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -86,7 +89,7 @@ public class MainScene extends AbstractScene {
 		// Instantiate the list of Layers
 		setLayerList(new LayerList(this, mtApplication));
 
-		// Instantiate a new temporal line and add it to the scene
+		// TODO Instantiate a new temporal line and add it to the scene
 		// temporalLine = new TemporalLine();
 		// this.getCanvas().addChild(temporalLine);
 
@@ -176,15 +179,16 @@ public class MainScene extends AbstractScene {
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
 			// Scale the map
-			scaleFactorX=scaleFactorX*((ScaleEvent) gesture).getScaleFactorX();
-			scaleFactorY=scaleFactorY*((ScaleEvent) gesture).getScaleFactorY();
-			compteur++;
-			if (compteur>10){
-				map.scale(scaleFactorX,scaleFactorY);
-				compteur=0;
-				scaleFactorX=1;
-				scaleFactorY=1;
-			}
+			map.scaleGlobal(((ScaleEvent) gesture).getScaleFactorX(), ((ScaleEvent) gesture).getScaleFactorY(), ((ScaleEvent) gesture).getScaleFactorZ(), ((ScaleEvent) gesture).getScalingPoint());
+                        
+			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED){
+                                float scaleFactor = mtApplication.width / map.getWidth();
+                                map.setHeightXYGlobal(mtApplication.height);
+                                map.setWidthXYGlobal(mtApplication.width);
+                                map.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
+                                
+                                map.scale(scaleFactor, gesture);
+                        }
 			return false;
 		}
 	}

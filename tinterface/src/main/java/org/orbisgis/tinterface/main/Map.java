@@ -19,25 +19,32 @@ import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.layerModel.OwsMapContext;
+import org.orbisgis.core.map.MapTransform;
 import org.orbisgis.core.workspace.CoreWorkspace;
 import org.orbisgis.progress.NullProgressMonitor;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import org.mt4j.input.inputData.InputCursor;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.io.WKTWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.mt4j.input.inputProcessors.MTGestureEvent;
+import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleEvent;
 
 import processing.core.PImage;
 
 /**
  * Constructor of the class Map
- * 
+ *
  * @author patrick
- * 
+ *
  */
 public class Map extends MTRectangle {
+
 	
 	public final MainFrame frame;
 	public final MapContext mapContext;
@@ -69,6 +76,7 @@ public class Map extends MTRectangle {
 				new Envelope(extent.getMinX() - facteur*extent.getWidth(), extent.getMaxX() + facteur*extent.getWidth(),
 					extent.getMinY() - facteur*extent.getHeight(), extent.getMaxY() + facteur*extent.getHeight()));
 	
+
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
 		BufferedImage im = frame.mapTransform.getImage();
@@ -87,6 +95,8 @@ public class Map extends MTRectangle {
 	 *            the number of pixel the map need to be moved (in y)
 	 */
 	public void move(float x, float y) {
+		// TODO Auto-generated method stub
+                
 		Envelope extent = frame.mapTransform.getExtent();
 		double dx = x*extent.getWidth()/(this.getWidthXYGlobal());
 		double dy = y*extent.getHeight()/(this.getHeightXYGlobal());
@@ -94,6 +104,7 @@ public class Map extends MTRectangle {
 				new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
 					extent.getMinY() + dy, extent.getMaxY() + dy));
 		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+
         mapContext.draw(frame.mapTransform, new NullProgressMonitor());
 
 		BufferedImage im = frame.mapTransform.getImage();
@@ -101,6 +112,16 @@ public class Map extends MTRectangle {
 		this.setTexture(image);
 
 	}
+        
+        public void addLayer(File layer) throws LayerException {
+                //Adding layer reference to the OWS file
+                Map.getSampleMapContext();
+        }
+        
+        public void removeLayer(File layer) throws LayerException {
+                //deleting reference from the OWS file
+                Map.getSampleMapContext();
+        }
 
 	private static MapContext getSampleMapContext()
 			throws IllegalStateException, LayerException {
@@ -201,23 +222,71 @@ public class Map extends MTRectangle {
 		return information;
 	}
 
-	public PImage getThumbnail() {
-		BufferedImage im = frame.mapTransform.getImage();
-		PImage image = new PImage(im);
-		return image;
-	}
 
-	public void scale(float scaleFactorX, float scaleFactorY) {
-		Envelope extent = frame.mapTransform.getExtent();
-		frame.mapTransform.setExtent(
-				new Envelope(extent.getMinX()+(scaleFactorX-1)*extent.getWidth(), extent.getMaxX()-(scaleFactorX-1)*extent.getWidth(),
-					extent.getMinY()+(scaleFactorY-1)*extent.getHeight(), extent.getMaxY()-(scaleFactorY-1)*extent.getHeight()));
-		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
-        mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+    public PImage getThumbnail(ILayer layer) {
+            
+        Envelope startExtent = frame.mapTransform.getExtent();
+            
+        ILayer[] layers = mapContext.getLayers();
+        
+        Boolean[] layerState = new Boolean[layers.length];
+        
+        for (int i=0; i < layers.length; i++) {
+                layerState[i] = layers[i].isVisible();
+                if (layer == layers[i]) {
+                        frame.mapTransform.setExtent(layers[i].getEnvelope());
+                        try {
+                                layers[i].setVisible(true);
+                        } catch (LayerException ex) {
+                        }
+                } else {
+                        try {
+                                layers[i].setVisible(false);
+                        } catch (LayerException ex) {
+                        }
+                }
+        }
+        
+        frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+        mapContext.draw(frame.mapTransform, new NullProgressMonitor(), layer);
+        BufferedImage im = frame.mapTransform.getImage();
+        PImage image = new PImage(im);
+        
+        for (int i=0; i < layers.length; i++) {
+                    try {
+                            layers[i].setVisible(layerState[i]);
+                    } catch (LayerException ex) {
+                    }
+        }
+        
+        frame.mapTransform.setExtent(startExtent);
+        return image;
+    }
 
-		BufferedImage im = frame.mapTransform.getImage();
-		PImage image = new PImage(im);
-		this.setTexture(image);		
+    public void scale(float scaleFactor, MTGestureEvent gesture) {
+        Envelope extent = frame.mapTransform.getExtent();
+                //System.out.println("xmoy : " + xmoy + "\nxdecal : " + xdecal + "\nminx de base : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth())) + "\nminx : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth()) + xdecal));
+                //sframe.mapTransform.setExtent(new Envelope(c1., scaleFactorY, scaleFactorY, scaleFactorY));
+                System.out.println(frame.mapTransform.getExtent());
+                //Getting the start coordinates of the zoom center
+                Vector3D scalingPoint = ((ScaleEvent) gesture).getScalingPoint();
+                
+                Coordinate startCoord = convert(scalingPoint);
+                
+                float minX = (float) (startCoord.x - (startCoord.x - extent.getMinX())*scaleFactor);
+                float maxX = (float) (startCoord.x - (startCoord.x - extent.getMaxX())*scaleFactor);
+                float minY = (float) (startCoord.y - (startCoord.y - extent.getMinY())*scaleFactor);
+                float maxY = (float) (startCoord.y - (startCoord.y - extent.getMaxY())*scaleFactor);
+                
+                frame.mapTransform.setExtent( new Envelope(minX, maxX, minY, maxY));
+        
+                frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+                mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+                System.out.println(frame.mapTransform.getExtent());
+                BufferedImage im = frame.mapTransform.getImage();
+                PImage image = new PImage(im);
+                
+                this.setTexture(image);	
 	}
 
 	/**
@@ -261,4 +330,13 @@ public class Map extends MTRectangle {
 		Coordinate coord = new Coordinate(x, y);
 		return coord;
 	}
+        
+        public float getWidth() {
+                return super.getWidthXYGlobal();
+        }
+
+        float getHeight() {
+                return super.getHeightXYGlobal();
+        }
+
 }

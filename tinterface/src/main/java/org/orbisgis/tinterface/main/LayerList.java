@@ -229,7 +229,7 @@ public class LayerList extends MTList{
 
 	//  create a draggable Element of the list with a picture and a label
 	private LayerCell createListCell(ILayer layer, IFont font, float cellWidth, float cellHeight, final MTColor cellFillColor, MTApplication mtApplication){
-		final LayerCell cell = new LayerCell(layer, mtApplication, font, cellFillColor, cellWidth, cellHeight);
+		final LayerCell cell = new LayerCell(layer, mtApplication, font, cellFillColor, cellWidth, cellHeight, m);
 
 		cell.unregisterAllInputProcessors();
 		// We define here the gestures that work on our cells
@@ -327,8 +327,6 @@ public class LayerList extends MTList{
 			cell.setLabel(cell.getLabel()+"(randomColor)");
 		}
 		
-		System.out.println("nb Couleurs (BIZARRE) : "+this.getListColors().size());
-		System.out.println("nb couleurs utilisees : "+this.getListUsedColors().size());
 		
 		cell.setActualColor(newColor);
 		listUsedColors.add(newColor);
