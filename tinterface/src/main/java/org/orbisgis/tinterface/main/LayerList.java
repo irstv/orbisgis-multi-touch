@@ -33,19 +33,6 @@ public class LayerList extends MTList{
 	/** The list of colors */
 	protected LinkedList<MTColor> listColors;
 	protected LinkedList<MTColor> listUsedColors;
-	
-	/** The list of Layers that we could add/delete */
-	protected LinkedList<Map> listOfLayers;
-	
-	/** The list of Layers already in place */
-	protected LinkedList<Map> listOfLayersInPlace;
-	
-	public Map getM() {
-		return m;
-	}
-	public void setM(Map m) {
-		this.m = m;
-	}
 
 	public LinkedList<MTColor> getListColors() {
 		return listColors;
@@ -61,47 +48,6 @@ public class LayerList extends MTList{
 		this.listUsedColors = listUsedColors;
 	}
 	
-	public LinkedList<Map> getListOfLayers() {
-		return listOfLayers;
-	}
-	public void setListOfLayers(LinkedList<Map> listOfLayers) {
-		this.listOfLayers = listOfLayers;
-	}
-	
-	public LinkedList<Map> getListOfLayersInPlace() {
-		return listOfLayersInPlace;
-	}
-	public void setListOfLayersInPlace(LinkedList<Map> listOfLayersInPlace) {
-		this.listOfLayersInPlace = listOfLayersInPlace;
-	}
-	
-	/** 
-	 * "Constructor-like" method to create and initialize the ListOfLayers
-	 * @return : List of Layers initialized
-	 */
-	public LinkedList<Map> ListOfLayers(){
-		LinkedList<Map> tempList = new LinkedList<Map>();
-		Map mTemp = getM();
-		// Lire dans un fichier/dans les ressources toutes les cartes qu'on pourra utiliser
-		for(int i=0;i<10;i++){
-			mTemp.setName("Element "+i);
-			tempList.add(mTemp);
-		}
-		
-		return tempList;
-	}
-	
-	/** 
-	 * "Constructor-like" method to create and initialize the ListOfLayers
-	 * @return : List of Layers initialized
-	 */
-	public LinkedList<Map> ListOfLayersInPlace(){
-		LinkedList<Map> tempList = new LinkedList<Map>();
-		
-		// Lire dans un fichier/dans les ressources les cartes � charger au d�marrage
-		
-		return tempList;
-	}
 	/**
 	 * Constructor of the list
 	 * @param mainScene
@@ -110,7 +56,7 @@ public class LayerList extends MTList{
 	public LayerList(MainScene mainScene, MTApplication mtApplication){
 
 		super(mtApplication,0, 0, 152, mtApplication.getHeight()); 
-		this.setM(mainScene.getMap());
+		this.m = mainScene.getMap();
 
 		/* Creates Layer Panel */
 		MTRectangle layerPanel = new MTRectangle(mtApplication,0,0,240, mtApplication.height);
@@ -128,10 +74,6 @@ public class LayerList extends MTList{
 		this.setAnchor(PositionAnchor.CENTER);
 		this.setPositionRelativeToParent(layerPanel.getCenterPointLocal());
 		layerPanel.addChild(this);
-		
-		/* Initialization of the lists of Layers */
-		this.listOfLayers = ListOfLayers();
-		this.listOfLayersInPlace = ListOfLayersInPlace();
 
 		/* Initialize the settings to generate the cells */
 		float cellWidth = 155, cellHeight = 90; 
@@ -139,7 +81,7 @@ public class LayerList extends MTList{
 		IFont font = FontManager.getInstance().createFont(mtApplication, "SansSerif.Bold", 15, MTColor.WHITE);
 		
 		// To define the number of colors/cells to create, we need
-		int nbCells = this.getListOfLayers().size();
+		int nbCells = m.mapContext.getLayers().length;
 		
 		// Initialization of the lists of colors 
 		this.listColors = new LinkedList<MTColor>();
@@ -155,17 +97,17 @@ public class LayerList extends MTList{
 			listColors.add(new MTColor(intColorLoop,intColorLoop,0,210));
 			listColors.add(new MTColor(0,intColorLoop,intColorLoop,210));
 			listColors.add(new MTColor(intColorLoop,0,intColorLoop,210));
-			listColors.add(new MTColor(intColorLoop,intColorLoop,intColorLoop,210));
+			listColors.add(new MTColor((int)Math.abs(intColorLoop-50),(int)Math.abs(intColorLoop-50),(int)Math.abs(intColorLoop-50),210));
 		}
 		
 		this.listUsedColors = new LinkedList<MTColor>();
 		
 		/* Generation of the cells */
 		LayerCell cellCreated = null;
-		for(ILayer mPossible:m.mapContext.getLayers()) {
-			cellCreated = this.createListCell(mPossible, font, cellWidth, cellHeight, cellFillColor, mtApplication);
+		for(ILayer layerPossible:m.mapContext.getLayers()) {
+			cellCreated = this.createListCell(layerPossible, font, cellWidth, cellHeight, cellFillColor, mtApplication);
 			
-			if(mPossible.isVisible()){
+			if(layerPossible.isVisible()){
 				setNewColorTo(cellCreated);
 			}
 			this.addListElement(cellCreated);
@@ -329,9 +271,6 @@ public class LayerList extends MTList{
 			newColor = new MTColor((int)Math.floor(Math.random()*255),(int)Math.floor(Math.random()*255),(int)Math.floor(Math.random()*255),180);
 			cell.setLabel(cell.getLabel()+"(randomColor)");
 		}
-		
-		System.out.println("nb Couleurs (BIZARRE) : "+this.getListColors().size());
-		System.out.println("nb couleurs utilisees : "+this.getListUsedColors().size());
 		
 		cell.setActualColor(newColor);
 		listUsedColors.add(newColor);
