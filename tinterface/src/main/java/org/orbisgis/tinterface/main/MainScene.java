@@ -178,6 +178,11 @@ public class MainScene extends AbstractScene {
 		 * Method called when a scale gesture is detected
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
+			//Remove the tooltips at the start of the scale gesture
+			if (gesture.getId() == MTGestureEvent.GESTURE_STARTED){
+				map.removeAllChildren();
+			}
+
 			// Scale the map
 			map.scaleGlobal(((ScaleEvent) gesture).getScaleFactorX(), ((ScaleEvent) gesture).getScaleFactorY(), ((ScaleEvent) gesture).getScaleFactorZ(), ((ScaleEvent) gesture).getScalingPoint());
                         
