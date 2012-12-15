@@ -1,9 +1,14 @@
 package org.orbisgis.tinterface.main;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.io.WKTWriter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
-
 import org.gdms.data.DataSource;
 import org.gdms.data.DataSourceCreationException;
 import org.gdms.driver.DriverException;
@@ -11,6 +16,8 @@ import org.gdms.driver.driverManager.DriverLoadException;
 import org.gdms.sql.engine.ParseException;
 import org.mt4j.MTApplication;
 import org.mt4j.components.visibleComponents.shapes.MTRectangle;
+import org.mt4j.input.inputProcessors.MTGestureEvent;
+import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleEvent;
 import org.mt4j.util.math.Vector3D;
 import org.orbisgis.core.DataManager;
 import org.orbisgis.core.Services;
@@ -19,27 +26,13 @@ import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.layerModel.OwsMapContext;
-import org.orbisgis.core.map.MapTransform;
 import org.orbisgis.core.workspace.CoreWorkspace;
 import org.orbisgis.progress.NullProgressMonitor;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import org.mt4j.input.inputData.InputCursor;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.io.WKTWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.mt4j.input.inputProcessors.MTGestureEvent;
-import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleEvent;
-
 import processing.core.PImage;
 
 /**
  * Constructor of the class Map
- *
+ * Creates a new Map, a mt4j rectangle element, textured with the OrbisGIS map
  * @author patrick
  *
  */
@@ -95,7 +88,6 @@ public class Map extends MTRectangle {
 	 *            the number of pixel the map need to be moved (in y)
 	 */
 	public void move(float x, float y) {
-		// TODO Auto-generated method stub
                 
 		Envelope extent = frame.mapTransform.getExtent();
 		double dx = x*extent.getWidth()/(this.getWidthXYGlobal());
@@ -126,7 +118,7 @@ public class Map extends MTRectangle {
 	private static MapContext getSampleMapContext()
 			throws IllegalStateException, LayerException {
 		MapContext mapContext = new OwsMapContext();
-		InputStream fileContent = Map.class.getResourceAsStream("Iris.ows");
+		InputStream fileContent = Map.class.getResourceAsStream("Layers.ows");
 		mapContext.read(fileContent);
 		mapContext.open(null);
 		return mapContext;
@@ -223,7 +215,13 @@ public class Map extends MTRectangle {
 	}
 
 
-    public PImage getThumbnail(ILayer layer) {
+        /**
+         * Returns a thumbnail of the selected layer
+         * Used to texture the layer list
+         * @param layer
+         * @return
+         */
+        public PImage getThumbnail(ILayer layer) {
             
         Envelope startExtent = frame.mapTransform.getExtent();
             
@@ -231,6 +229,7 @@ public class Map extends MTRectangle {
         
         Boolean[] layerState = new Boolean[layers.length];
         
+        //Set only the selected layer visible and saves the mapTransform state to set it back later
         for (int i=0; i < layers.length; i++) {
                 layerState[i] = layers[i].isVisible();
                 if (layer == layers[i]) {
@@ -247,11 +246,13 @@ public class Map extends MTRectangle {
                 }
         }
         
+        //getting the thumbnail
         frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
         mapContext.draw(frame.mapTransform, new NullProgressMonitor(), layer);
         BufferedImage im = frame.mapTransform.getImage();
         PImage image = new PImage(im);
         
+        //reset of the map transform at its original state
         for (int i=0; i < layers.length; i++) {
                     try {
                             layers[i].setVisible(layerState[i]);
@@ -263,7 +264,12 @@ public class Map extends MTRectangle {
         return image;
     }
 
-    public void scale(float scaleFactor, MTGestureEvent gesture) {
+        /**
+         * Calculates and sets the new envelope of the map thanks to the zoom parameters.
+         * @param scaleFactor
+         * @param gesture
+         */
+        public void scale(float scaleFactor, MTGestureEvent gesture) {
         Envelope extent = frame.mapTransform.getExtent();
                 //System.out.println("xmoy : " + xmoy + "\nxdecal : " + xdecal + "\nminx de base : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth())) + "\nminx : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth()) + xdecal));
                 //sframe.mapTransform.setExtent(new Envelope(c1., scaleFactorY, scaleFactorY, scaleFactorY));
@@ -331,12 +337,12 @@ public class Map extends MTRectangle {
 		return coord;
 	}
         
+        /**
+         * Returns the map width in pixels
+         * @return
+         */
         public float getWidth() {
                 return super.getWidthXYGlobal();
-        }
-
-        float getHeight() {
-                return super.getHeightXYGlobal();
         }
 
 }

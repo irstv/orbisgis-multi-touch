@@ -1,15 +1,8 @@
 package org.orbisgis.tinterface.main;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import java.awt.Window;
-
-import org.gdms.data.DataSourceCreationException;
-import org.gdms.driver.DriverException;
-import org.gdms.sql.engine.ParseException;
 import org.mt4j.MTApplication;
 import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
-import org.mt4j.input.inputData.InputCursor;
 import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragEvent;
@@ -178,11 +171,13 @@ public class MainScene extends AbstractScene {
 		 * Method called when a scale gesture is detected
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
-			// Scale the map
+			// First, the rectangle is scaled during the gesture
 			map.scaleGlobal(((ScaleEvent) gesture).getScaleFactorX(), ((ScaleEvent) gesture).getScaleFactorY(), ((ScaleEvent) gesture).getScaleFactorZ(), ((ScaleEvent) gesture).getScalingPoint());
                         
+                        // At the end of the gesture, we calculate the new envelope, reset the rectangle and retexture it
 			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED){
                                 float scaleFactor = mtApplication.width / map.getWidth();
+                                
                                 map.setHeightXYGlobal(mtApplication.height*map.buffersize);
                                 map.setWidthXYGlobal(mtApplication.width*map.buffersize);
                                 map.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
