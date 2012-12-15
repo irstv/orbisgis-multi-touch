@@ -39,10 +39,7 @@ public class MainScene extends AbstractScene {
 	 */
 	private LayerList layerList;
 	
-	private int compteur;
 	private Vector3D vect;
-	private float scaleFactorX;
-	private float scaleFactorY;
 
 	/**
 	 * The temporal line
@@ -62,10 +59,7 @@ public class MainScene extends AbstractScene {
 		
 		this.mtApplication = mtApplication;
 
-		compteur =0;
 		vect = new Vector3D(0, 0);
-		scaleFactorX=1;
-		scaleFactorY=1;
 		// Add a circle around every point that is touched
 		this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
 
@@ -135,7 +129,6 @@ public class MainScene extends AbstractScene {
 		 * Method called when a drag gesture is detected
 		 */
 		public boolean processGestureEvent(MTGestureEvent gesture) {
-			compteur++;				
 			// Get the translation vector
 			Vector3D tVect = ((DragEvent) gesture).getTranslationVect();
 			vect = vect.addLocal(tVect);
