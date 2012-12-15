@@ -7,9 +7,6 @@ Settings.txt
 .project
 .settings
 bin/
-*.ows
-
-*.dll
 
 *.dll
 
