@@ -38,9 +38,14 @@ import org.orbisgis.core.map.MapTransform;
 /**
  * Sample of a component that draw a map context
  */
-public class MainFrame {
+public class OrbisGISMap {
         private MapContext mapContext;
-        public MapTransform mapTransform;
+        private MapTransform mapTransform;
+        
+        public MapTransform getMapTransform(){
+        	return this.mapTransform;
+        }
+        
         /**
          * Load the map context and render into a Buffered Image
          */

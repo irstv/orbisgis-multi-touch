@@ -39,10 +39,10 @@ import processing.core.PImage;
 public class Map extends MTRectangle {
 
 	
-	public final MainFrame frame;
-	public final MapContext mapContext;
-	public MTApplication mtApplication;
-	public float buffersize;
+	private final OrbisGISMap frame;
+	private final MapContext mapContext;
+	private MTApplication mtApplication;
+	private float buffersize;
 	
 	public Map(MTApplication mtApplication, MainScene mainScene, float buffersize)
 			throws Exception {
@@ -60,23 +60,31 @@ public class Map extends MTRectangle {
 				"OrbisGIS_MT" + File.separator);
 		workspace.setWorkspaceFolder(workspaceFolder.getAbsolutePath());
 		MainContext mainContext = new MainContext(true, workspace, true);
-		frame = new MainFrame();
+		frame = new OrbisGISMap();
 		mapContext = getSampleMapContext();
 		frame.init(mapContext, (int)(mtApplication.width*buffersize), (int)(mtApplication.height*buffersize));
-		Envelope extent = frame.mapTransform.getExtent();
+		Envelope extent = frame.getMapTransform().getExtent();
 		double facteur = (buffersize-1)/2;
-		frame.mapTransform.setExtent(
+		frame.getMapTransform().setExtent(
 				new Envelope(extent.getMinX() - facteur*extent.getWidth(), extent.getMaxX() + facteur*extent.getWidth(),
 					extent.getMinY() - facteur*extent.getHeight(), extent.getMaxY() + facteur*extent.getHeight()));
 	
 
-        mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+        mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
 
-		BufferedImage im = frame.mapTransform.getImage();
+		BufferedImage im = frame.getMapTransform().getImage();
 		PImage image = new PImage(im);
 
 		this.setTexture(image);
 		mainScene.getCanvas().addChild(this);
+	}
+	
+	public float getBuffersize(){
+		return this.buffersize;
+	}
+	
+	public MapContext getMapContext(){
+		return this.mapContext;
 	}
 
 	/**
@@ -89,17 +97,17 @@ public class Map extends MTRectangle {
 	 */
 	public void move(float x, float y) {
                 
-		Envelope extent = frame.mapTransform.getExtent();
+		Envelope extent = frame.getMapTransform().getExtent();
 		double dx = x*extent.getWidth()/(this.getWidthXYGlobal());
 		double dy = y*extent.getHeight()/(this.getHeightXYGlobal());
-		frame.mapTransform.setExtent(
+		frame.getMapTransform().setExtent(
 				new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
 					extent.getMinY() + dy, extent.getMaxY() + dy));
-		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
+		frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
 
-        mapContext.draw(frame.mapTransform, new NullProgressMonitor());
+        mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
 
-		BufferedImage im = frame.mapTransform.getImage();
+		BufferedImage im = frame.getMapTransform().getImage();
 		PImage image = new PImage(im);
 		this.setTexture(image);
 
@@ -223,7 +231,7 @@ public class Map extends MTRectangle {
          */
         public PImage getThumbnail(ILayer layer) {
             
-        Envelope startExtent = frame.mapTransform.getExtent();
+        Envelope startExtent = frame.getMapTransform().getExtent();
             
         ILayer[] layers = mapContext.getLayers();
         
@@ -233,7 +241,7 @@ public class Map extends MTRectangle {
         for (int i=0; i < layers.length; i++) {
                 layerState[i] = layers[i].isVisible();
                 if (layer == layers[i]) {
-                        frame.mapTransform.setExtent(layers[i].getEnvelope());
+                        frame.getMapTransform().setExtent(layers[i].getEnvelope());
                         try {
                                 layers[i].setVisible(true);
                         } catch (LayerException ex) {
@@ -247,9 +255,9 @@ public class Map extends MTRectangle {
         }
         
         //getting the thumbnail
-        frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
-        mapContext.draw(frame.mapTransform, new NullProgressMonitor(), layer);
-        BufferedImage im = frame.mapTransform.getImage();
+        frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
+        mapContext.draw(frame.getMapTransform(), new NullProgressMonitor(), layer);
+        BufferedImage im = frame.getMapTransform().getImage();
         PImage image = new PImage(im);
         
         //reset of the map transform at its original state
@@ -260,7 +268,7 @@ public class Map extends MTRectangle {
                     }
         }
         
-        frame.mapTransform.setExtent(startExtent);
+        frame.getMapTransform().setExtent(startExtent);
         return image;
     }
 
@@ -270,10 +278,10 @@ public class Map extends MTRectangle {
          * @param gesture
          */
         public void scale(float scaleFactor, MTGestureEvent gesture) {
-        Envelope extent = frame.mapTransform.getExtent();
+        Envelope extent = frame.getMapTransform().getExtent();
                 //System.out.println("xmoy : " + xmoy + "\nxdecal : " + xdecal + "\nminx de base : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth())) + "\nminx : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth()) + xdecal));
                 //sframe.mapTransform.setExtent(new Envelope(c1., scaleFactorY, scaleFactorY, scaleFactorY));
-                System.out.println(frame.mapTransform.getExtent());
+                System.out.println(frame.getMapTransform().getExtent());
                 //Getting the start coordinates of the zoom center
                 Vector3D scalingPoint = ((ScaleEvent) gesture).getScalingPoint();
                 
@@ -284,12 +292,12 @@ public class Map extends MTRectangle {
                 float minY = (float) (startCoord.y - (startCoord.y - extent.getMinY())*scaleFactor*buffersize);
                 float maxY = (float) (startCoord.y - (startCoord.y - extent.getMaxY())*scaleFactor*buffersize);
                 
-                frame.mapTransform.setExtent( new Envelope(minX, maxX, minY, maxY));
+                frame.getMapTransform().setExtent( new Envelope(minX, maxX, minY, maxY));
         
-                frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
-                mapContext.draw(frame.mapTransform, new NullProgressMonitor());
-                System.out.println(frame.mapTransform.getExtent());
-                BufferedImage im = frame.mapTransform.getImage();
+                frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
+                mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
+                System.out.println(frame.getMapTransform().getExtent());
+                BufferedImage im = frame.getMapTransform().getImage();
                 PImage image = new PImage(im);
                 
                 this.setTexture(image);	
@@ -313,9 +321,9 @@ public class Map extends MTRectangle {
 				visible=layer.isVisible();
 			}
 		}
-		frame.mapTransform.setImage(new BufferedImage(frame.mapTransform.getWidth(), frame.mapTransform.getHeight(), BufferedImage.TYPE_INT_ARGB));
-		mapContext.draw(frame.mapTransform, new NullProgressMonitor());
-		BufferedImage im = frame.mapTransform.getImage();
+		frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
+		mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
+		BufferedImage im = frame.getMapTransform().getImage();
 		PImage image = new PImage(im);
 		this.setTexture(image);
 		
@@ -328,7 +336,7 @@ public class Map extends MTRectangle {
 	 * @return coord the corresponding coordinate
 	 */
 	public Coordinate convert(Vector3D vector){
-		Envelope extent = frame.mapTransform.getExtent();
+		Envelope extent = frame.getMapTransform().getExtent();
 		
 		double x = extent.getMinX()+(vector.getX() + mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
 		double y = extent.getMinY()+(mtApplication.height-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);

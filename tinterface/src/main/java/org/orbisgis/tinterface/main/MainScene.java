@@ -176,8 +176,8 @@ public class MainScene extends AbstractScene {
 			if (gesture.getId() == MTGestureEvent.GESTURE_ENDED){
                                 float scaleFactor = mtApplication.width / map.getWidth();
                                 
-                                map.setHeightXYGlobal(mtApplication.height*map.buffersize);
-                                map.setWidthXYGlobal(mtApplication.width*map.buffersize);
+                                map.setHeightXYGlobal(mtApplication.height*map.getBuffersize());
+                                map.setWidthXYGlobal(mtApplication.width*map.getBuffersize());
                                 map.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
                                 
                                 map.scale(scaleFactor, gesture);
