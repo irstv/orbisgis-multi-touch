@@ -16,8 +16,8 @@ import org.mt4j.sceneManagement.AbstractScene;
 import org.mt4j.util.math.Vector3D;
 
 /**
- * This class create the main scene from the application. The map, the layer
- * list and the temporal line are added as son from this scene
+ * This class create the main scene from the application. The map and the layer
+ * list are added as son from this scene
  *
  * @author patrick
  *
@@ -36,12 +36,11 @@ public class MainScene extends AbstractScene {
          * The layer list
          */
         private LayerList layerList;
+        /**
+         * The vector used to memorize the total drag gesture
+         */
         private Vector3D vect;
 
-        /**
-         * The temporal line
-         */
-        // private TemporalLine temporalLine;
         /**
          * Constructor of MainScene
          *
@@ -51,9 +50,10 @@ public class MainScene extends AbstractScene {
         public MainScene(MTApplication mtApplication, String name) {
                 super(mtApplication, name);
 
+                //Initialize parameters
                 this.mtApplication = mtApplication;
-
                 vect = new Vector3D(0, 0);
+                
                 // Add a circle around every point that is touched
                 this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
 
@@ -61,18 +61,13 @@ public class MainScene extends AbstractScene {
                 // configuration file) and add it to the scene
                 try {
                         //If encountered a heap of memory exception, set a lower buffer size
-                        setMap(new Map(mtApplication, this, 3));
+                        setMap(new Map(mtApplication, this, 1));
                 } catch (Exception e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                 }
 
                 // Instantiate the list of Layers
-                setLayerList(new LayerList(this, mtApplication));
-
-                // TODO Instantiate a new temporal line and add it to the scene
-                // temporalLine = new TemporalLine();
-                // this.getCanvas().addChild(temporalLine);
+                this.layerList = new LayerList(this, mtApplication);
 
                 // Add the drag gesture on the map (the class MapDrag will be used)
                 map.registerInputProcessor(new DragProcessor(mtApplication));
@@ -107,10 +102,6 @@ public class MainScene extends AbstractScene {
                 return layerList;
         }
 
-        public void setLayerList(LayerList layerList) {
-                this.layerList = layerList;
-        }
-
         /**
          * Nested class used when a drag gesture on the map is detected
          *
@@ -124,10 +115,14 @@ public class MainScene extends AbstractScene {
                  */
                 @Override
                 public boolean processGestureEvent(MTGestureEvent gesture) {
-                        // Get the translation vector
+                        // Get the translation vector and memorize the sum
                         Vector3D tVect = ((DragEvent) gesture).getTranslationVect();
                         vect = vect.addLocal(tVect);
+                        
+                        //Translate the rectangle containing the map
                         map.translateGlobal(tVect);
+                        
+                        //Draw a new map at the end of the gesture
                         if (gesture.getId() == MTGestureEvent.GESTURE_ENDED) {
                                 // Move the map
                                 map.move(vect.x, vect.y);
@@ -138,6 +133,8 @@ public class MainScene extends AbstractScene {
                                 for (i = 0; i < children.length; i++) {
                                         children[i].translate(vect);
                                 }
+                                
+                                //Put the rectangle in the middle of the screen
                                 map.setPositionGlobal(new Vector3D(mtApplication.width / 2, mtApplication.height / 2));
                                 vect.setX(0);
                                 vect.setY(0);
@@ -164,6 +161,7 @@ public class MainScene extends AbstractScene {
                         if (gesture.getId() == MTGestureEvent.GESTURE_STARTED) {
                                 map.removeAllChildren();
                         }
+                        
                         // First, the rectangle is scaled during the gesture
                         map.scaleGlobal(((ScaleEvent) gesture).getScaleFactorX(), ((ScaleEvent) gesture).getScaleFactorY(), ((ScaleEvent) gesture).getScaleFactorZ(), ((ScaleEvent) gesture).getScalingPoint());
                         
@@ -203,8 +201,7 @@ public class MainScene extends AbstractScene {
                                 Vector3D vector = new Vector3D(gesture.getCursor().getStartPosX(), gesture.getCursor().getStartPosY());
 
                                 //Get the informations about this position
-                                String infos;
-                                infos = map.getInfos(vector);
+                                String infos = map.getInfos(vector);
                                 Tooltip tooltip = new Tooltip(mtApplication, infos);
                                 map.addChild(tooltip);
                                 tooltip.setPositionGlobal(vector);
