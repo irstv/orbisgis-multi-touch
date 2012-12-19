@@ -28,28 +28,12 @@ public class LayerList extends MTList {
         /**
          * The map
          */
-        protected Map m;
+        protected Map map;
         /**
          * The list of colors
          */
         protected LinkedList<MTColor> listColors;
         protected LinkedList<MTColor> listUsedColors;
-
-        public LinkedList<MTColor> getListColors() {
-                return listColors;
-        }
-
-        public void setListColors(LinkedList<MTColor> listColors) {
-                this.listColors = listColors;
-        }
-
-        public LinkedList<MTColor> getListUsedColors() {
-                return listUsedColors;
-        }
-
-        public void setListUsedColors(LinkedList<MTColor> listUsedColors) {
-                this.listUsedColors = listUsedColors;
-        }
 
         /**
          * Constructor of the list
@@ -60,11 +44,11 @@ public class LayerList extends MTList {
         public LayerList(MainScene mainScene, MTApplication mtApplication) {
 
                 super(mtApplication, 0, 0, 152, mtApplication.getHeight());
-                this.m = mainScene.getMap();
+                this.map = mainScene.getMap();
 
                 /* We get the maximum of the numbers of characters (if >15) of the labels of the layers to define the width of the cell and the panel */
                 int maxCharactersNumber = 15;
-                for (ILayer layers : m.getMapContext().getLayers()) {
+                for (ILayer layers : map.getMapContext().getLayers()) {
                         if (layers.getName().length() > maxCharactersNumber) {
                                 maxCharactersNumber = layers.getName().length();
                         }
@@ -81,7 +65,7 @@ public class LayerList extends MTList {
                 mainScene.getCanvas().addChild(layerPanel);
 
                 /* Initialization of our LayerList itself */
-                this.setChildClip(null); //FIXME TEST -> do no clipping for performance
+                this.setChildClip(null);
                 this.setNoFill(true);
                 this.setNoStroke(true);
                 this.unregisterAllInputProcessors();
@@ -95,7 +79,7 @@ public class LayerList extends MTList {
                 IFont font = FontManager.getInstance().createFont(mtApplication, "SansSerif.Bold", 15, MTColor.WHITE);
 
                 // To define the number of colors/cells to create, we need to get the number of layers that will fit in the list
-                int nbCells = m.getMapContext().getLayers().length;
+                int nbCells = map.getMapContext().getLayers().length;
 
                 // Initialization of the lists of colors 
                 this.listColors = new LinkedList<MTColor>();
@@ -118,7 +102,7 @@ public class LayerList extends MTList {
 
                 /* Generation of the cells */
                 LayerCell cellCreated = null;
-                for (ILayer layerPossible : m.getMapContext().getLayers()) {
+                for (ILayer layerPossible : map.getMapContext().getLayers()) {
                         // We create the cell
                         cellCreated = this.createListCell(layerPossible, font, cellWidth, cellHeight, cellFillColor, mtApplication);
 
@@ -177,16 +161,14 @@ public class LayerList extends MTList {
                                 }
                                 return false;
                         }
-                });
-
-                //updateTagContainerScale(); //needed to initialize..if not i observed strange behavior with the photo tags 
+                }); 
         }
         private boolean animationRunning = false;
         private boolean doSlideIn = false;
 
-        //  create a draggable Element of the list with a picture and a label
+        //Create a draggable Element of the list with a picture and a label
         private LayerCell createListCell(ILayer layer, IFont font, float cellWidth, float cellHeight, final MTColor cellFillColor, MTApplication mtApplication) {
-                final LayerCell cell = new LayerCell(layer, mtApplication, font, cellFillColor, cellWidth, cellHeight, m);
+                final LayerCell cell = new LayerCell(layer, mtApplication, font, cellFillColor, cellWidth, cellHeight, map);
 
                 cell.unregisterAllInputProcessors();
                 // We define here the gestures that work on our cells
@@ -214,7 +196,7 @@ public class LayerList extends MTList {
                                                 if (Math.abs(translationVectorInv.x) >= 150) {
                                                         if (!cell.isMapAlreadyInPlace()) {
                                                                 setNewColorTo(cell);
-                                                                cell.setMapAlreadyInPlace(m.changeLayerState(cell.getLabel()));
+                                                                cell.setMapAlreadyInPlace(map.changeLayerState(cell.getLabel()));
                                                         }
                                                 } else {
                                                         cell.setActualColor(oldColor);
@@ -245,7 +227,7 @@ public class LayerList extends MTList {
                                                 if (te.isHoldComplete() && cell.isMapAlreadyInPlace()) {
                                                         cell.setActualColor(cellFillColor);
                                                         listUsedColors.remove(oldColor);
-                                                        cell.setMapAlreadyInPlace(m.changeLayerState(cell.getLabel()));
+                                                        cell.setMapAlreadyInPlace(map.changeLayerState(cell.getLabel()));
                                                 }
                                                 break;
                                 }

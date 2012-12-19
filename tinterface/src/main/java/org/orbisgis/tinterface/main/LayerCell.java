@@ -102,7 +102,7 @@ public class LayerCell extends MTListCell {
                 this.layer = layer;
                 this.width = cellWidth;
                 setMapAlreadyInPlace(layer.isVisible());
-                this.setChildClip(null); //FIXME TEST, no clipping for performance!
+                this.setChildClip(null);
 
                 this.setFillColor(cellFillColor);
                 // Thumbnail is added here
