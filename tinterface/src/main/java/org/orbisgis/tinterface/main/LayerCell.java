@@ -81,7 +81,8 @@ public class LayerCell extends MTListCell {
 	 * @param cellFillColor : default color of the cell
 	 * @param cellWidth : Width of the cell
 	 * @param cellHeight : Height of the cell
-	 * @param layer : layer that the cell represents
+         * @param layer : layer that the cell represents
+         * @param map  
 	 */
 	public LayerCell(ILayer layer, MTApplication mtApplication, IFont font, final MTColor cellFillColor,float cellWidth, float cellHeight, Map map) {
 		super(mtApplication, cellWidth, cellHeight);

@@ -112,16 +112,6 @@ public class Map extends MTRectangle {
 		this.setTexture(image);
 
 	}
-        
-        public void addLayer(File layer) throws LayerException {
-                //Adding layer reference to the OWS file
-                Map.getSampleMapContext();
-        }
-        
-        public void removeLayer(File layer) throws LayerException {
-                //deleting reference from the OWS file
-                Map.getSampleMapContext();
-        }
 
 	private static MapContext getSampleMapContext()
 			throws IllegalStateException, LayerException {
@@ -154,7 +144,7 @@ public class Map extends MTRectangle {
 				new LinearRing[0]);
 		
 		//Look for information in all the visible layers (stop when information is found)
-		while ((information.equals("")) && i<mapContext.getLayers().length){
+		while ((information.isEmpty()) && i<mapContext.getLayers().length){
 			if (mapContext.getLayers()[i].isVisible()){
 				information=getInfos(mapContext.getLayers()[i], geomEnvelope);
 			}
@@ -162,7 +152,7 @@ public class Map extends MTRectangle {
 		}
 		
 		//If no information was found, we return this message
-		if (information.equals("")){
+		if (information.isEmpty()){
 			information = "No Information Available";
 		}
 		
@@ -179,8 +169,7 @@ public class Map extends MTRectangle {
 	public String getInfos(ILayer layer, Geometry geomEnvelope){
 		String information = "";
 		int i;
-		String sql = null;
-		System.out.println(layer.getName());
+		String sql;
 		try{
 			DataSource dataSourceInitial = layer.getDataSource();
 					
@@ -232,9 +221,7 @@ public class Map extends MTRectangle {
         public PImage getThumbnail(ILayer layer) {
             
         Envelope startExtent = frame.getMapTransform().getExtent();
-            
         ILayer[] layers = mapContext.getLayers();
-        
         Boolean[] layerState = new Boolean[layers.length];
         
         //Set only the selected layer visible and saves the mapTransform state to set it back later
@@ -260,43 +247,40 @@ public class Map extends MTRectangle {
         BufferedImage im = frame.getMapTransform().getImage();
         PImage image = new PImage(im);
         
-        //reset of the map transform at its original state
+        //reset  the map transform at its original state
         for (int i=0; i < layers.length; i++) {
                     try {
                             layers[i].setVisible(layerState[i]);
                     } catch (LayerException ex) {
                     }
         }
-        
         frame.getMapTransform().setExtent(startExtent);
         return image;
     }
 
         /**
          * Calculates and sets the new envelope of the map thanks to the zoom parameters.
+         * Helps zooming around a point between the user's two fingers.
          * @param scaleFactor
          * @param gesture
          */
         public void scale(float scaleFactor, MTGestureEvent gesture) {
         Envelope extent = frame.getMapTransform().getExtent();
-                //System.out.println("xmoy : " + xmoy + "\nxdecal : " + xdecal + "\nminx de base : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth())) + "\nminx : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth()) + xdecal));
-                //sframe.mapTransform.setExtent(new Envelope(c1., scaleFactorY, scaleFactorY, scaleFactorY));
-                System.out.println(frame.getMapTransform().getExtent());
-                //Getting the start coordinates of the zoom center
+
+                //Get the starting coordinates of the zoom center
                 Vector3D scalingPoint = ((ScaleEvent) gesture).getScalingPoint();
-                
                 Coordinate startCoord = convert(scalingPoint);
                 
+                //Calculate the new coordinates of the bounding box
                 float minX = (float) (startCoord.x - (startCoord.x - extent.getMinX())*scaleFactor*buffersize);
                 float maxX = (float) (startCoord.x - (startCoord.x - extent.getMaxX())*scaleFactor*buffersize);
                 float minY = (float) (startCoord.y - (startCoord.y - extent.getMinY())*scaleFactor*buffersize);
                 float maxY = (float) (startCoord.y - (startCoord.y - extent.getMaxY())*scaleFactor*buffersize);
                 
+                //Set the new extent and get the new image
                 frame.getMapTransform().setExtent( new Envelope(minX, maxX, minY, maxY));
-        
                 frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
                 mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
-                System.out.println(frame.getMapTransform().getExtent());
                 BufferedImage im = frame.getMapTransform().getImage();
                 PImage image = new PImage(im);
                 
@@ -305,7 +289,8 @@ public class Map extends MTRectangle {
 
 	/**
 	 * This method change the state (visible or not visible) of the layer whose name is in parameter
-	 * @param label the name of the layer
+         * @param label the name of the layer
+         * @return visible 
 	 */
 	public boolean changeLayerState(String label) {
 		boolean visible=false;
@@ -315,7 +300,6 @@ public class Map extends MTRectangle {
 					layer.setVisible(!layer.isVisible());
 
 				} catch (LayerException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				visible=layer.isVisible();

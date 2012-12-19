@@ -128,6 +128,7 @@ public class MainScene extends AbstractScene {
 		/**
 		 * Method called when a drag gesture is detected
 		 */
+                @Override
 		public boolean processGestureEvent(MTGestureEvent gesture) {
 			// Get the translation vector
 			Vector3D tVect = ((DragEvent) gesture).getTranslationVect();
@@ -163,6 +164,7 @@ public class MainScene extends AbstractScene {
 		/**
 		 * Method called when a scale gesture is detected
 		 */
+                @Override
 		public boolean processGestureEvent(MTGestureEvent gesture) {
 			//Remove the tooltips at the start of the scale gesture
 			if (gesture.getId() == MTGestureEvent.GESTURE_STARTED){
@@ -197,6 +199,7 @@ public class MainScene extends AbstractScene {
 		/**
 		 * Method called when a tap and hold gesture is detected
 		 */
+                @Override
 		public boolean processGestureEvent(MTGestureEvent gest) {
 			TapAndHoldEvent gesture = (TapAndHoldEvent) gest;
 			//Check if the gesture is finished and if it was completed
@@ -205,7 +208,7 @@ public class MainScene extends AbstractScene {
 				Vector3D vector = new Vector3D(gesture.getCursor().getStartPosX(), gesture.getCursor().getStartPosY());
 
 				//Get the informations about this position
-				String infos = null;
+				String infos;
 				infos = map.getInfos(vector);
 				Tooltip tooltip = new Tooltip(mtApplication, infos);
 				map.addChild(tooltip);
