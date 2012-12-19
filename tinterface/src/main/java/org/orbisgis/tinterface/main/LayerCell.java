@@ -91,8 +91,8 @@ public class LayerCell extends MTListCell {
 		this.setChildClip(null); //FIXME TEST, no clipping for performance!
 
 		this.setFillColor(cellFillColor);
-		// Thumbnail is added here (now just a white rectangle)
-		MTRectangle thumbnail = new MTRectangle (mtApplication, 0,1,(int)(Math.floor(cellWidth)),((float)mtApplication.getHeight()/mtApplication.getWidth())*cellWidth);
+		// Thumbnail is added here
+		thumbnail = new MTRectangle (mtApplication, 0,1,(int)(Math.floor(cellWidth)),((float)mtApplication.getHeight()/mtApplication.getWidth())*cellWidth);
 		thumbnail.setTexture(map.getThumbnail(layer));
 		thumbnail.setStrokeWeight(0);
 		this.addChild(thumbnail);

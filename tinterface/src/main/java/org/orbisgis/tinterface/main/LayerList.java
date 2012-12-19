@@ -59,7 +59,7 @@ public class LayerList extends MTList{
 
 		/* We get the maximum of the numbers of characters (if >15) of the labels of the layers to define the width of the cell and the panel */
 		int maxCharactersNumber=15;
-		for(ILayer layers:m.mapContext.getLayers()){
+		for(ILayer layers:m.getMapContext().getLayers()){
 			if(layers.getName().length()>maxCharactersNumber){
 				maxCharactersNumber = layers.getName().length();
 			}
@@ -90,7 +90,7 @@ public class LayerList extends MTList{
 		IFont font = FontManager.getInstance().createFont(mtApplication, "SansSerif.Bold", 15, MTColor.WHITE);
 		
 		// To define the number of colors/cells to create, we need to get the number of layers that will fit in the list
-		int nbCells = m.mapContext.getLayers().length;
+		int nbCells = m.getMapContext().getLayers().length;
 		
 		// Initialization of the lists of colors 
 		this.listColors = new LinkedList<MTColor>();
@@ -113,7 +113,7 @@ public class LayerList extends MTList{
 		
 		/* Generation of the cells */
 		LayerCell cellCreated = null;
-		for(ILayer layerPossible:m.mapContext.getLayers()) {
+		for(ILayer layerPossible:m.getMapContext().getLayers()) {
 			// We create the cell
 			cellCreated = this.createListCell(layerPossible, font, cellWidth, cellHeight, cellFillColor, mtApplication);
 			
