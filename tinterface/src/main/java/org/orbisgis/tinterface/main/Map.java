@@ -125,7 +125,6 @@ public class Map extends MTRectangle {
                 BufferedImage im = frame.getMapTransform().getImage();
                 PImage image = new PImage(im);
                 this.setTexture(image);
-
         }
 
         /**
@@ -294,18 +293,16 @@ public class Map extends MTRectangle {
          * @param scaleFactor
          * @param gesture
          */
-        public void scale(float scaleFactor, MTGestureEvent gesture) {
+        public void scale(float scaleFactor, MTGestureEvent gesture, Vector3D centerPos, float width, float height) {
                 Envelope extent = frame.getMapTransform().getExtent();
 
-                //Get the starting coordinates of the zoom center
-                Vector3D scalingPoint = ((ScaleEvent) gesture).getScalingPoint();
-                Coordinate startCoord = convert(scalingPoint);
+                double dx = (mtApplication.width/2 - centerPos.x) * extent.getWidth() / width;
+                double dy = (mtApplication.height/2 - centerPos.y) * extent.getHeight() / height;
 
-                //Calculate the new coordinates of the bounding box
-                float minX = (float) (startCoord.x - (startCoord.x - extent.getMinX()) * scaleFactor * buffersize);
-                float maxX = (float) (startCoord.x - (startCoord.x - extent.getMaxX()) * scaleFactor * buffersize);
-                float minY = (float) (startCoord.y - (startCoord.y - extent.getMinY()) * scaleFactor * buffersize);
-                float maxY = (float) (startCoord.y - (startCoord.y - extent.getMaxY()) * scaleFactor * buffersize);
+                double minX = extent.getMinX()+extent.getWidth()/2*(1-scaleFactor) + dx;
+                double maxX = extent.getMaxX()-extent.getWidth()/2*(1-scaleFactor) + dx;
+                double minY = extent.getMinY()+extent.getHeight()/2*(1-scaleFactor)- dy;
+                double maxY = extent.getMaxY()-extent.getHeight()/2*(1-scaleFactor)- dy;
 
                 //Set the new extent and get the new image
                 frame.getMapTransform().setExtent(new Envelope(minX, maxX, minY, maxY));
@@ -313,7 +310,6 @@ public class Map extends MTRectangle {
                 mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
                 BufferedImage im = frame.getMapTransform().getImage();
                 PImage image = new PImage(im);
-
                 this.setTexture(image);
         }
 
@@ -374,4 +370,8 @@ public class Map extends MTRectangle {
         public float getWidth() {
                 return super.getWidthXYGlobal();
         }
+
+		public float getHeight() {
+            return super.getHeightXYGlobal();
+		}
 }

@@ -163,15 +163,15 @@ public class MainScene extends AbstractScene {
                         
                         // At the end of the gesture, we calculate the new envelope, reset the rectangle and retexture it
                         if (gesture.getId() == MTGestureEvent.GESTURE_ENDED) {
-                                float scaleFactor = mtApplication.width / map.getWidth();
+                                float scaleFactor = mtApplication.width*map.getBuffersize() / map.getWidth();
+                                float width = map.getWidth();
+                                float height = map.getHeight();
                                 Vector3D centerPos = new Vector3D(map.getCenterPointGlobal());
                                 
-                                map.move((centerPos.x-mtApplication.width/2), (centerPos.y-mtApplication.height/2));
                                 map.setHeightXYGlobal(mtApplication.height * map.getBuffersize());
                                 map.setWidthXYGlobal(mtApplication.width * map.getBuffersize());
                                 map.setPositionGlobal(new Vector3D(mtApplication.width / 2, mtApplication.height / 2));
-                                
-                                map.scale(scaleFactor, gesture);
+                                map.scale(scaleFactor, gesture,centerPos, width, height);
                         }
                         return false;
                 }
