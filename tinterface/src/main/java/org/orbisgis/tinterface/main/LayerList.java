@@ -23,6 +23,10 @@ import org.mt4j.util.font.IFont;
 import org.mt4j.util.math.Vector3D;
 import org.orbisgis.core.layerModel.ILayer;
 
+/**
+ * Class used to create and manage the layer list
+ *
+ */
 public class LayerList extends MTList {
 
         /**

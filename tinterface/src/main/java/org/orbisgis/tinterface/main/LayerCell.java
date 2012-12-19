@@ -90,11 +90,11 @@ public class LayerCell extends MTListCell {
          * Constructor of our LayerCell
          *
          * @param mtApplication
-         * @param font : font to write the label
-         * @param cellFillColor : default color of the cell
-         * @param cellWidth : Width of the cell
-         * @param cellHeight : Height of the cell
-         * @param layer : layer that the cell represents
+         * @param font font to write the label
+         * @param cellFillColor default color of the cell
+         * @param cellWidth Width of the cell
+         * @param cellHeight Height of the cell
+         * @param layer layer that the cell represents
          * @param map
          */
         public LayerCell(ILayer layer, MTApplication mtApplication, IFont font, final MTColor cellFillColor, float cellWidth, float cellHeight, Map map) {
