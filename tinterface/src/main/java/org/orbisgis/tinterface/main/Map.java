@@ -31,8 +31,8 @@ import org.orbisgis.progress.NullProgressMonitor;
 import processing.core.PImage;
 
 /**
- * Constructor of the class Map Creates a new Map, a mt4j rectangle element,
- * textured with the OrbisGIS map
+ * Constructor of the class Map
+ * Creates a new Map, a mt4j rectangle element, textured with the OrbisGIS map
  *
  * @author patrick
  *
@@ -41,19 +41,32 @@ public class Map extends MTRectangle {
 
         private final OrbisGISMap frame;
         private final MapContext mapContext;
+        /**
+         * The mtApplication
+         */
         private MTApplication mtApplication;
+        /**
+         * The number by which the size of the screen is multipled to draw the rectangle
+         */
         private float buffersize;
 
         public Map(MTApplication mtApplication, MainScene mainScene, float buffersize)
                 throws Exception {
+        		//Create the rectangle (that will contain the map)
                 super(mtApplication, mtApplication.width * buffersize, mtApplication.height * buffersize);
+                
+                //Delete the white borders of the rectangle
                 this.setNoStroke(true);
+                //Place the rectangle in the middle of the screen
                 this.setPositionGlobal(new Vector3D(mtApplication.width / 2, mtApplication.height / 2));
+                //Initialize attributes
                 this.mtApplication = mtApplication;
                 this.buffersize = buffersize;
+                //Remove the predefined gestures for the rectangle
                 this.unregisterAllInputProcessors();
                 this.removeAllGestureEventListeners();
 
+                //Initialize the map with OrbisGIS
                 MainContext.initConsoleLogger(true);
                 CoreWorkspace workspace = new CoreWorkspace();
                 File workspaceFolder = new File(System.getProperty("user.home"),
@@ -61,7 +74,7 @@ public class Map extends MTRectangle {
                 workspace.setWorkspaceFolder(workspaceFolder.getAbsolutePath());
                 MainContext mainContext = new MainContext(true, workspace, true);
                 frame = new OrbisGISMap();
-                mapContext = getSampleMapContext();
+                mapContext = loadMapContext();
                 frame.init(mapContext, (int) (mtApplication.width * buffersize), (int) (mtApplication.height * buffersize));
                 Envelope extent = frame.getMapTransform().getExtent();
                 double facteur = (buffersize - 1) / 2;
@@ -69,13 +82,15 @@ public class Map extends MTRectangle {
                         new Envelope(extent.getMinX() - facteur * extent.getWidth(), extent.getMaxX() + facteur * extent.getWidth(),
                         extent.getMinY() - facteur * extent.getHeight(), extent.getMaxY() + facteur * extent.getHeight()));
 
-
+                //Draw an image of the map
                 mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
 
+                //Put the image as texture of the rectangle
                 BufferedImage im = frame.getMapTransform().getImage();
                 PImage image = new PImage(im);
-
                 this.setTexture(image);
+                
+                //Add the rectangle to the main scene
                 mainScene.getCanvas().addChild(this);
         }
 
@@ -94,24 +109,32 @@ public class Map extends MTRectangle {
          * @param y the number of pixel the map need to be moved (in y)
          */
         public void move(float x, float y) {
-
+        		//Modify the extent of the map
                 Envelope extent = frame.getMapTransform().getExtent();
                 double dx = x * extent.getWidth() / (this.getWidthXYGlobal());
                 double dy = y * extent.getHeight() / (this.getHeightXYGlobal());
                 frame.getMapTransform().setExtent(
                         new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
                         extent.getMinY() + dy, extent.getMaxY() + dy));
+                
+                //Draw the new image
                 frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
-
                 mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
 
+                //Put this new image as texture as the rectangle
                 BufferedImage im = frame.getMapTransform().getImage();
                 PImage image = new PImage(im);
                 this.setTexture(image);
 
         }
 
-        private static MapContext getSampleMapContext()
+        /**
+         * Get the MapContext with the layers from the configuration file
+         * @return the map context
+         * @throws IllegalStateException
+         * @throws LayerException
+         */
+        private static MapContext loadMapContext()
                 throws IllegalStateException, LayerException {
                 MapContext mapContext = new OwsMapContext();
                 InputStream fileContent = Map.class.getResourceAsStream("Layers.ows");
@@ -220,8 +243,8 @@ public class Map extends MTRectangle {
          * Returns a thumbnail of the selected layer Used to texture the layer
          * list
          *
-         * @param layer
-         * @return
+         * @param layer the layer from which we want the thumbnail
+         * @return the thumbnail
          */
         public PImage getThumbnail(ILayer layer) {
 
@@ -299,10 +322,11 @@ public class Map extends MTRectangle {
          * whose name is in parameter
          *
          * @param label the name of the layer
-         * @return visible
+         * @return visible boolean saying if the layer is (or not) visible
          */
         public boolean changeLayerState(String label) {
                 boolean visible = false;
+                //Look for the layer corresponding to the name
                 for (ILayer layer : mapContext.getLayers()) {
                         if (layer.getName().equals(label)) {
                                 try {
@@ -314,6 +338,8 @@ public class Map extends MTRectangle {
                                 visible = layer.isVisible();
                         }
                 }
+                
+                //Draw the new image in the rectangle
                 frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
                 mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
                 BufferedImage im = frame.getMapTransform().getImage();

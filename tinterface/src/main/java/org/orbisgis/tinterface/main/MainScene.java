@@ -61,7 +61,7 @@ public class MainScene extends AbstractScene {
                 // configuration file) and add it to the scene
                 try {
                         //If encountered a heap of memory exception, set a lower buffer size
-                        setMap(new Map(mtApplication, this, 1));
+                        this.map = new Map(mtApplication, this, 1);
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
@@ -92,10 +92,6 @@ public class MainScene extends AbstractScene {
 
         public Map getMap() {
                 return map;
-        }
-
-        public void setMap(Map map) {
-                this.map = map;
         }
 
         public LayerList getLayerList() {
