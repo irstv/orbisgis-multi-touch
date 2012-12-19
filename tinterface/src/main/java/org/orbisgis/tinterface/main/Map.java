@@ -31,326 +31,321 @@ import org.orbisgis.progress.NullProgressMonitor;
 import processing.core.PImage;
 
 /**
- * Constructor of the class Map
- * Creates a new Map, a mt4j rectangle element, textured with the OrbisGIS map
+ * Constructor of the class Map Creates a new Map, a mt4j rectangle element,
+ * textured with the OrbisGIS map
+ *
  * @author patrick
  *
  */
 public class Map extends MTRectangle {
 
-	
-	private final OrbisGISMap frame;
-	private final MapContext mapContext;
-	private MTApplication mtApplication;
-	private float buffersize;
-	
-	public Map(MTApplication mtApplication, MainScene mainScene, float buffersize)
-			throws Exception {
-		super(mtApplication, mtApplication.width*buffersize, mtApplication.height*buffersize);
-		this.setNoStroke(true);
-		this.setPositionGlobal(new Vector3D(mtApplication.width/2, mtApplication.height/2));
-		this.mtApplication=mtApplication;
-		this.buffersize = buffersize;
-		this.unregisterAllInputProcessors();
-		this.removeAllGestureEventListeners();
+        private final OrbisGISMap frame;
+        private final MapContext mapContext;
+        private MTApplication mtApplication;
+        private float buffersize;
 
-		MainContext.initConsoleLogger(true);
-		CoreWorkspace workspace = new CoreWorkspace();
-		File workspaceFolder = new File(System.getProperty("user.home"),
-				"OrbisGIS_MT" + File.separator);
-		workspace.setWorkspaceFolder(workspaceFolder.getAbsolutePath());
-		MainContext mainContext = new MainContext(true, workspace, true);
-		frame = new OrbisGISMap();
-		mapContext = getSampleMapContext();
-		frame.init(mapContext, (int)(mtApplication.width*buffersize), (int)(mtApplication.height*buffersize));
-		Envelope extent = frame.getMapTransform().getExtent();
-		double facteur = (buffersize-1)/2;
-		frame.getMapTransform().setExtent(
-				new Envelope(extent.getMinX() - facteur*extent.getWidth(), extent.getMaxX() + facteur*extent.getWidth(),
-					extent.getMinY() - facteur*extent.getHeight(), extent.getMaxY() + facteur*extent.getHeight()));
-	
+        public Map(MTApplication mtApplication, MainScene mainScene, float buffersize)
+                throws Exception {
+                super(mtApplication, mtApplication.width * buffersize, mtApplication.height * buffersize);
+                this.setNoStroke(true);
+                this.setPositionGlobal(new Vector3D(mtApplication.width / 2, mtApplication.height / 2));
+                this.mtApplication = mtApplication;
+                this.buffersize = buffersize;
+                this.unregisterAllInputProcessors();
+                this.removeAllGestureEventListeners();
 
-        mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
+                MainContext.initConsoleLogger(true);
+                CoreWorkspace workspace = new CoreWorkspace();
+                File workspaceFolder = new File(System.getProperty("user.home"),
+                        "OrbisGIS_MT" + File.separator);
+                workspace.setWorkspaceFolder(workspaceFolder.getAbsolutePath());
+                MainContext mainContext = new MainContext(true, workspace, true);
+                frame = new OrbisGISMap();
+                mapContext = getSampleMapContext();
+                frame.init(mapContext, (int) (mtApplication.width * buffersize), (int) (mtApplication.height * buffersize));
+                Envelope extent = frame.getMapTransform().getExtent();
+                double facteur = (buffersize - 1) / 2;
+                frame.getMapTransform().setExtent(
+                        new Envelope(extent.getMinX() - facteur * extent.getWidth(), extent.getMaxX() + facteur * extent.getWidth(),
+                        extent.getMinY() - facteur * extent.getHeight(), extent.getMaxY() + facteur * extent.getHeight()));
 
-		BufferedImage im = frame.getMapTransform().getImage();
-		PImage image = new PImage(im);
 
-		this.setTexture(image);
-		mainScene.getCanvas().addChild(this);
-	}
-	
-	public float getBuffersize(){
-		return this.buffersize;
-	}
-	
-	public MapContext getMapContext(){
-		return this.mapContext;
-	}
+                mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
 
-	/**
-	 * Method used to move the map from the parameter in input
-	 * 
-	 * @param x
-	 *            the number of pixel the map need to be moved (in x)
-	 * @param y
-	 *            the number of pixel the map need to be moved (in y)
-	 */
-	public void move(float x, float y) {
-                
-		Envelope extent = frame.getMapTransform().getExtent();
-		double dx = x*extent.getWidth()/(this.getWidthXYGlobal());
-		double dy = y*extent.getHeight()/(this.getHeightXYGlobal());
-		frame.getMapTransform().setExtent(
-				new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
-					extent.getMinY() + dy, extent.getMaxY() + dy));
-		frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
+                BufferedImage im = frame.getMapTransform().getImage();
+                PImage image = new PImage(im);
 
-        mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
-
-		BufferedImage im = frame.getMapTransform().getImage();
-		PImage image = new PImage(im);
-		this.setTexture(image);
-
-	}
-        
-        public void addLayer(File layer) throws LayerException {
-                //Adding layer reference to the OWS file
-                Map.getSampleMapContext();
-        }
-        
-        public void removeLayer(File layer) throws LayerException {
-                //deleting reference from the OWS file
-                Map.getSampleMapContext();
+                this.setTexture(image);
+                mainScene.getCanvas().addChild(this);
         }
 
-	private static MapContext getSampleMapContext()
-			throws IllegalStateException, LayerException {
-		MapContext mapContext = new OwsMapContext();
-		InputStream fileContent = Map.class.getResourceAsStream("Layers.ows");
-		mapContext.read(fileContent);
-		mapContext.open(null);
-		return mapContext;
-	}
+        public float getBuffersize() {
+                return this.buffersize;
+        }
 
-	/**
-	 * This function get the informations corresponding the the position of the input vector
-	 * @param vector the vector corresponding to the position
-	 * @return the information about this position (String)
-	 */
-	public String getInfos(Vector3D vector){
-		String information = "";
-		GeometryFactory gf = new GeometryFactory();
-		int i=0;
-			
-		//Create a square of 20 pixels around the touched point
-		Coordinate lowerLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()+10));
-		Coordinate upperRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()-10));
-		Coordinate lowerRight = this.convert( new Vector3D(vector.getX()+10, vector.getY()+10));
-		Coordinate upperLeft = this.convert( new Vector3D(vector.getX()-10, vector.getY()-10));
-
-		LinearRing envelopeShell = gf.createLinearRing(new Coordinate[] {
-				lowerLeft, upperLeft, upperRight, lowerRight, lowerLeft, });
-		Geometry geomEnvelope = gf.createPolygon(envelopeShell,
-				new LinearRing[0]);
-		
-		//Look for information in all the visible layers (stop when information is found)
-		while ((information.equals("")) && i<mapContext.getLayers().length){
-			if (mapContext.getLayers()[i].isVisible()){
-				information=getInfos(mapContext.getLayers()[i], geomEnvelope);
-			}
-			i++;
-		}
-		
-		//If no information was found, we return this message
-		if (information.equals("")){
-			information = "No Information Available";
-		}
-		
-		//Return the string (without the last \n)
-		return information.trim();
-	}
-	
-	/**
-	 * This method return the information present in the layer and the square in parameter 
-	 * @param layer the layer in which we look for information
-	 * @param geomEnvelope the square in which to look
-	 * @return the information
-	 */
-	public String getInfos(ILayer layer, Geometry geomEnvelope){
-		String information = "";
-		int i;
-		String sql = null;
-		System.out.println(layer.getName());
-		try{
-			DataSource dataSourceInitial = layer.getDataSource();
-					
-			//Get the DataSource corresponding to the square in dataSourceSquare
-			WKTWriter writer = new WKTWriter();
-			sql = "select * from " + layer.getName() + " where ST_intersects("
-					+ dataSourceInitial.getMetadata().getFieldName(dataSourceInitial.getSpatialFieldIndex()) + ", ST_geomfromtext('"
-					+ writer.write(geomEnvelope) + "'));";
-			DataSource dataSourceSquare = ((DataManager) Services
-					.getService(DataManager.class)).getDataSourceFactory()
-					.getDataSourceFromSQL(sql);
-			dataSourceSquare.open();
-			
-			//Put the information from dataSourceSquare in the variable if only one line match the touched rectangle
-			switch ((int)(dataSourceSquare.getRowCount())){
-			case 0 :
-				information = "";
-				break;
-			case 1 : 			
-				for (i=1;i<dataSourceSquare.getFieldCount();i++){
-					information = information + dataSourceSquare.getFieldName(i)+" : "+dataSourceSquare.getFieldValue(0, i).toString()+"\n";
-				};
-				break;
-			default : information = "Zoom to have more precise informations"; break;
-			}
-		} catch (DriverLoadException e) {
-			throw new RuntimeException(e);
-		} catch (DataSourceCreationException e) {
-			e.printStackTrace();
-			information = "No Information Available";
-		} catch (DriverException e) {
-			e.printStackTrace();
-			information = "No Information Available";
-		} catch (ParseException e) {
-			e.printStackTrace();
-			information = "No Information Available";
-		}
-		
-		return information;
-	}
-
+        public MapContext getMapContext() {
+                return this.mapContext;
+        }
 
         /**
-         * Returns a thumbnail of the selected layer
-         * Used to texture the layer list
+         * Method used to move the map from the parameter in input
+         *
+         * @param x the number of pixel the map need to be moved (in x)
+         * @param y the number of pixel the map need to be moved (in y)
+         */
+        public void move(float x, float y) {
+
+                Envelope extent = frame.getMapTransform().getExtent();
+                double dx = x * extent.getWidth() / (this.getWidthXYGlobal());
+                double dy = y * extent.getHeight() / (this.getHeightXYGlobal());
+                frame.getMapTransform().setExtent(
+                        new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
+                        extent.getMinY() + dy, extent.getMaxY() + dy));
+                frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
+
+                mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
+
+                BufferedImage im = frame.getMapTransform().getImage();
+                PImage image = new PImage(im);
+                this.setTexture(image);
+
+        }
+
+        private static MapContext getSampleMapContext()
+                throws IllegalStateException, LayerException {
+                MapContext mapContext = new OwsMapContext();
+                InputStream fileContent = Map.class.getResourceAsStream("Layers.ows");
+                mapContext.read(fileContent);
+                mapContext.open(null);
+                return mapContext;
+        }
+
+        /**
+         * This function get the informations corresponding the the position of
+         * the input vector
+         *
+         * @param vector the vector corresponding to the position
+         * @return the information about this position (String)
+         */
+        public String getInfos(Vector3D vector) {
+                String information = "";
+                GeometryFactory gf = new GeometryFactory();
+                int i = 0;
+
+                //Create a square of 20 pixels around the touched point
+                Coordinate lowerLeft = this.convert(new Vector3D(vector.getX() - 10, vector.getY() + 10));
+                Coordinate upperRight = this.convert(new Vector3D(vector.getX() + 10, vector.getY() - 10));
+                Coordinate lowerRight = this.convert(new Vector3D(vector.getX() + 10, vector.getY() + 10));
+                Coordinate upperLeft = this.convert(new Vector3D(vector.getX() - 10, vector.getY() - 10));
+
+                LinearRing envelopeShell = gf.createLinearRing(new Coordinate[]{
+                                lowerLeft, upperLeft, upperRight, lowerRight, lowerLeft,});
+                Geometry geomEnvelope = gf.createPolygon(envelopeShell,
+                        new LinearRing[0]);
+
+                //Look for information in all the visible layers (stop when information is found)
+                while ((information.isEmpty()) && i < mapContext.getLayers().length) {
+                        if (mapContext.getLayers()[i].isVisible()) {
+                                information = getInfos(mapContext.getLayers()[i], geomEnvelope);
+                        }
+                        i++;
+                }
+
+                //If no information was found, we return this message
+                if (information.isEmpty()) {
+                        information = "No Information Available";
+                }
+
+                //Return the string (without the last \n)
+                return information.trim();
+        }
+
+        /**
+         * This method return the information present in the layer and the
+         * square in parameter
+         *
+         * @param layer the layer in which we look for information
+         * @param geomEnvelope the square in which to look
+         * @return the information
+         */
+        public String getInfos(ILayer layer, Geometry geomEnvelope) {
+                String information = "";
+                int i;
+                String sql;
+                try {
+                        DataSource dataSourceInitial = layer.getDataSource();
+
+                        //Get the DataSource corresponding to the square in dataSourceSquare
+                        WKTWriter writer = new WKTWriter();
+                        sql = "select * from " + layer.getName() + " where ST_intersects("
+                                + dataSourceInitial.getMetadata().getFieldName(dataSourceInitial.getSpatialFieldIndex()) + ", ST_geomfromtext('"
+                                + writer.write(geomEnvelope) + "'));";
+                        DataSource dataSourceSquare = ((DataManager) Services
+                                .getService(DataManager.class)).getDataSourceFactory()
+                                .getDataSourceFromSQL(sql);
+                        dataSourceSquare.open();
+
+                        //Put the information from dataSourceSquare in the variable if only one line match the touched rectangle
+                        switch ((int) (dataSourceSquare.getRowCount())) {
+                                case 0:
+                                        information = "";
+                                        break;
+                                case 1:
+                                        for (i = 1; i < dataSourceSquare.getFieldCount(); i++) {
+                                                information = information + dataSourceSquare.getFieldName(i) + " : " + dataSourceSquare.getFieldValue(0, i).toString() + "\n";
+                                        }
+                                        ;
+                                        break;
+                                default:
+                                        information = "Zoom to have more precise informations";
+                                        break;
+                        }
+                } catch (DriverLoadException e) {
+                        throw new RuntimeException(e);
+                } catch (DataSourceCreationException e) {
+                        e.printStackTrace();
+                        information = "No Information Available";
+                } catch (DriverException e) {
+                        e.printStackTrace();
+                        information = "No Information Available";
+                } catch (ParseException e) {
+                        e.printStackTrace();
+                        information = "No Information Available";
+                }
+
+                return information;
+        }
+
+        /**
+         * Returns a thumbnail of the selected layer Used to texture the layer
+         * list
+         *
          * @param layer
          * @return
          */
         public PImage getThumbnail(ILayer layer) {
-            
-        Envelope startExtent = frame.getMapTransform().getExtent();
-            
-        ILayer[] layers = mapContext.getLayers();
-        
-        Boolean[] layerState = new Boolean[layers.length];
-        
-        //Set only the selected layer visible and saves the mapTransform state to set it back later
-        for (int i=0; i < layers.length; i++) {
-                layerState[i] = layers[i].isVisible();
-                if (layer == layers[i]) {
-                        frame.getMapTransform().setExtent(layers[i].getEnvelope());
-                        try {
-                                layers[i].setVisible(true);
-                        } catch (LayerException ex) {
+
+                Envelope startExtent = frame.getMapTransform().getExtent();
+                ILayer[] layers = mapContext.getLayers();
+                Boolean[] layerState = new Boolean[layers.length];
+
+                //Set only the selected layer visible and saves the mapTransform state to set it back later
+                for (int i = 0; i < layers.length; i++) {
+                        layerState[i] = layers[i].isVisible();
+                        if (layer == layers[i]) {
+                                frame.getMapTransform().setExtent(layers[i].getEnvelope());
+                                try {
+                                        layers[i].setVisible(true);
+                                } catch (LayerException ex) {
+                                }
+                        } else {
+                                try {
+                                        layers[i].setVisible(false);
+                                } catch (LayerException ex) {
+                                }
                         }
-                } else {
+                }
+
+                //getting the thumbnail
+                frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
+                mapContext.draw(frame.getMapTransform(), new NullProgressMonitor(), layer);
+                BufferedImage im = frame.getMapTransform().getImage();
+                PImage image = new PImage(im);
+
+                //reset  the map transform at its original state
+                for (int i = 0; i < layers.length; i++) {
                         try {
-                                layers[i].setVisible(false);
+                                layers[i].setVisible(layerState[i]);
                         } catch (LayerException ex) {
                         }
                 }
+                frame.getMapTransform().setExtent(startExtent);
+                return image;
         }
-        
-        //getting the thumbnail
-        frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
-        mapContext.draw(frame.getMapTransform(), new NullProgressMonitor(), layer);
-        BufferedImage im = frame.getMapTransform().getImage();
-        PImage image = new PImage(im);
-        
-        //reset of the map transform at its original state
-        for (int i=0; i < layers.length; i++) {
-                    try {
-                            layers[i].setVisible(layerState[i]);
-                    } catch (LayerException ex) {
-                    }
-        }
-        
-        frame.getMapTransform().setExtent(startExtent);
-        return image;
-    }
 
         /**
-         * Calculates and sets the new envelope of the map thanks to the zoom parameters.
+         * Calculates and sets the new envelope of the map thanks to the zoom
+         * parameters. Helps zooming around a point between the user's two
+         * fingers.
+         *
          * @param scaleFactor
          * @param gesture
          */
         public void scale(float scaleFactor, MTGestureEvent gesture) {
-        Envelope extent = frame.getMapTransform().getExtent();
-                //System.out.println("xmoy : " + xmoy + "\nxdecal : " + xdecal + "\nminx de base : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth())) + "\nminx : " + ((extent.getMinX() + (scaleFactorX - 1) * extent.getWidth()) + xdecal));
-                //sframe.mapTransform.setExtent(new Envelope(c1., scaleFactorY, scaleFactorY, scaleFactorY));
-                System.out.println(frame.getMapTransform().getExtent());
-                //Getting the start coordinates of the zoom center
+                Envelope extent = frame.getMapTransform().getExtent();
+
+                //Get the starting coordinates of the zoom center
                 Vector3D scalingPoint = ((ScaleEvent) gesture).getScalingPoint();
-                
                 Coordinate startCoord = convert(scalingPoint);
-                
-                float minX = (float) (startCoord.x - (startCoord.x - extent.getMinX())*scaleFactor*buffersize);
-                float maxX = (float) (startCoord.x - (startCoord.x - extent.getMaxX())*scaleFactor*buffersize);
-                float minY = (float) (startCoord.y - (startCoord.y - extent.getMinY())*scaleFactor*buffersize);
-                float maxY = (float) (startCoord.y - (startCoord.y - extent.getMaxY())*scaleFactor*buffersize);
-                
-                frame.getMapTransform().setExtent( new Envelope(minX, maxX, minY, maxY));
-        
+
+                //Calculate the new coordinates of the bounding box
+                float minX = (float) (startCoord.x - (startCoord.x - extent.getMinX()) * scaleFactor * buffersize);
+                float maxX = (float) (startCoord.x - (startCoord.x - extent.getMaxX()) * scaleFactor * buffersize);
+                float minY = (float) (startCoord.y - (startCoord.y - extent.getMinY()) * scaleFactor * buffersize);
+                float maxY = (float) (startCoord.y - (startCoord.y - extent.getMaxY()) * scaleFactor * buffersize);
+
+                //Set the new extent and get the new image
+                frame.getMapTransform().setExtent(new Envelope(minX, maxX, minY, maxY));
                 frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
                 mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
-                System.out.println(frame.getMapTransform().getExtent());
                 BufferedImage im = frame.getMapTransform().getImage();
                 PImage image = new PImage(im);
-                
-                this.setTexture(image);	
-	}
 
-	/**
-	 * This method change the state (visible or not visible) of the layer whose name is in parameter
-	 * @param label the name of the layer
-	 */
-	public boolean changeLayerState(String label) {
-		boolean visible=false;
-		for(ILayer layer:mapContext.getLayers()) {
-			if (layer.getName().equals(label)){
-				try {
-					layer.setVisible(!layer.isVisible());
+                this.setTexture(image);
+        }
 
-				} catch (LayerException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				visible=layer.isVisible();
-			}
-		}
-		frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
-		mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
-		BufferedImage im = frame.getMapTransform().getImage();
-		PImage image = new PImage(im);
-		this.setTexture(image);
-		
-		return visible;
-	}
-	
-	/**
-	 * This method return the coordinate corresponding to the point of the screen (in pixels) in parameter
-	 * @param vector the point in pixel
-	 * @return coord the corresponding coordinate
-	 */
-	public Coordinate convert(Vector3D vector){
-		Envelope extent = frame.getMapTransform().getExtent();
-		
-		double x = extent.getMinX()+(vector.getX() + mtApplication.width*(buffersize-1)/2)*extent.getWidth()/(mtApplication.width*buffersize);
-		double y = extent.getMinY()+(mtApplication.height-vector.getY()+mtApplication.height*(buffersize-1)/2)*extent.getHeight()/(mtApplication.height*buffersize);
+        /**
+         * This method change the state (visible or not visible) of the layer
+         * whose name is in parameter
+         *
+         * @param label the name of the layer
+         * @return visible
+         */
+        public boolean changeLayerState(String label) {
+                boolean visible = false;
+                for (ILayer layer : mapContext.getLayers()) {
+                        if (layer.getName().equals(label)) {
+                                try {
+                                        layer.setVisible(!layer.isVisible());
 
-		Coordinate coord = new Coordinate(x, y);
-		return coord;
-	}
-        
+                                } catch (LayerException e) {
+                                        e.printStackTrace();
+                                }
+                                visible = layer.isVisible();
+                        }
+                }
+                frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
+                mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
+                BufferedImage im = frame.getMapTransform().getImage();
+                PImage image = new PImage(im);
+                this.setTexture(image);
+
+                return visible;
+        }
+
+        /**
+         * This method return the coordinate corresponding to the point of the
+         * screen (in pixels) in parameter
+         *
+         * @param vector the point in pixel
+         * @return coord the corresponding coordinate
+         */
+        public Coordinate convert(Vector3D vector) {
+                Envelope extent = frame.getMapTransform().getExtent();
+
+                double x = extent.getMinX() + (vector.getX() + mtApplication.width * (buffersize - 1) / 2) * extent.getWidth() / (mtApplication.width * buffersize);
+                double y = extent.getMinY() + (mtApplication.height - vector.getY() + mtApplication.height * (buffersize - 1) / 2) * extent.getHeight() / (mtApplication.height * buffersize);
+
+                Coordinate coord = new Coordinate(x, y);
+                return coord;
+        }
+
         /**
          * Returns the map width in pixels
+         *
          * @return
          */
         public float getWidth() {
                 return super.getWidthXYGlobal();
         }
-
 }
