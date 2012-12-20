@@ -6,6 +6,8 @@ Settings.txt
 .classpath
 .project
 .settings
+*.ows
+*/Mainscene.java
 bin/
 
 *.dll
