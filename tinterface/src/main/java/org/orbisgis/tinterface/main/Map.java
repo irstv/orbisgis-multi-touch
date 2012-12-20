@@ -17,7 +17,6 @@ import org.gdms.sql.engine.ParseException;
 import org.mt4j.MTApplication;
 import org.mt4j.components.visibleComponents.shapes.MTRectangle;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
-import org.mt4j.input.inputProcessors.componentProcessors.scaleProcessor.ScaleEvent;
 import org.mt4j.util.math.Vector3D;
 import org.orbisgis.core.DataManager;
 import org.orbisgis.core.Services;
@@ -46,7 +45,7 @@ public class Map extends MTRectangle {
          */
         private MTApplication mtApplication;
         /**
-         * The number by which the size of the screen is multipled to draw the rectangle
+         * The number by which the size of the screen is multiplied to draw the rectangle
          */
         private float buffersize;
 
