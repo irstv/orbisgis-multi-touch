@@ -55,13 +55,13 @@ public class MainScene extends AbstractScene {
                 vect = new Vector3D(0, 0);
                 
                 // Add a circle around every point that is touched
-                this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
+                // this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
 
                 // Instantiate a new map with the default configuration (specify in a
                 // configuration file) and add it to the scene
                 try {
                         //If encountered a heap of memory exception, set a lower buffer size
-                        this.map = new Map(mtApplication, this, 1);
+                        this.map = new Map(mtApplication, this, (float)2.5 );
                 } catch (Exception e) {
                         e.printStackTrace();
                 }

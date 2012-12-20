@@ -5,6 +5,7 @@ import org.mt4j.MTApplication;
 import org.mt4j.components.interfaces.IMTComponent3D;
 import org.mt4j.components.visibleComponents.shapes.MTRectangle;
 import org.mt4j.components.visibleComponents.widgets.MTList;
+import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
 import org.mt4j.input.inputProcessors.IGestureEventListener;
 import org.mt4j.input.inputProcessors.MTGestureEvent;
 import org.mt4j.input.inputProcessors.componentProcessors.dragProcessor.DragEvent;
@@ -57,7 +58,7 @@ public class LayerList extends MTList {
                                 maxCharactersNumber = layers.getName().length();
                         }
                 }
-                float cellWidth = Math.max((int) (maxCharactersNumber * 8.5), 150);
+                float cellWidth = Math.max((int) (maxCharactersNumber * 10.1), 150);
 
                 /* Creates Layer Panel */
                 int marginLeftPanelList = 100, marginListCell = 20;
@@ -108,7 +109,7 @@ public class LayerList extends MTList {
                 LayerCell cellCreated = null;
                 for (ILayer layerPossible : map.getMapContext().getLayers()) {
                         // We create the cell
-                        cellCreated = this.createListCell(layerPossible, font, cellWidth, cellHeight, cellFillColor, mtApplication);
+                        cellCreated = this.createListCell(layerPossible, font, cellWidth, cellHeight, cellFillColor, mtApplication, mainScene);
 
                         //  If it is displayed at start : we color this cell
                         if (layerPossible.isVisible()) {
@@ -171,7 +172,7 @@ public class LayerList extends MTList {
         private boolean doSlideIn = false;
 
         //Create a draggable Element of the list with a picture and a label
-        private LayerCell createListCell(ILayer layer, IFont font, float cellWidth, float cellHeight, final MTColor cellFillColor, MTApplication mtApplication) {
+        private LayerCell createListCell(ILayer layer, IFont font, float cellWidth, float cellHeight, final MTColor cellFillColor, MTApplication mtApplication, MainScene mainScene) {
                 final LayerCell cell = new LayerCell(layer, mtApplication, font, cellFillColor, cellWidth, cellHeight, map);
 
                 cell.unregisterAllInputProcessors();
@@ -216,7 +217,11 @@ public class LayerList extends MTList {
                 TapAndHoldProcessor tap = new TapAndHoldProcessor(mtApplication);
                 tap.setHoldTime(1000);
                 cell.registerInputProcessor(tap);
-
+                
+                //Creation of a visualizer for the tap and hold gesture
+                TapAndHoldVisualizer visualizer = new TapAndHoldVisualizer(mtApplication, mainScene.getCanvas());
+                cell.addGestureListener(TapAndHoldProcessor.class, visualizer);
+                
                 cell.addGestureListener(TapAndHoldProcessor.class, new IGestureEventListener() {
                         public boolean processGestureEvent(MTGestureEvent ge) {
                                 TapAndHoldEvent te = (TapAndHoldEvent) ge;
