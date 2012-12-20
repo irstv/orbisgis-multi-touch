@@ -7,7 +7,6 @@ Settings.txt
 .project
 .settings
 *.ows
-*/Mainscene.java
 bin/
 
 *.dll
