@@ -55,7 +55,7 @@ public class MainScene extends AbstractScene {
                 vect = new Vector3D(0, 0);
                 
                 // Add a circle around every point that is touched
-                this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
+                // this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
 
                 // Instantiate a new map with the default configuration (specify in a
                 // configuration file) and add it to the scene
