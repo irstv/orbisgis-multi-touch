@@ -55,7 +55,7 @@ public class Tooltip extends MTTextArea{
 	 */
 	private class TooltipTapAndHold implements IGestureEventListener {
 		/**
-		 * Method called when a tap and hold gesture is detected
+		 * Method called when a tap and hold gesture is detected (to remove this tooltip)
 		 */
 		public boolean processGestureEvent(MTGestureEvent gest) {
 			TapAndHoldEvent gesture = (TapAndHoldEvent) gest;
