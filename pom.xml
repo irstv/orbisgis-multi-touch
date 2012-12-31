@@ -4,7 +4,7 @@
         <groupId>org.orbisgis</groupId>
         <artifactId>orbisgis-mt</artifactId>
         <packaging>pom</packaging>
-        <version>4.0-SNAPSHOT</version>
+        <version>1.0</version>
         <name>platform-multitouch</name>
         <organization>
                 <name>IRSTV CNRS-FR-2488</name>
@@ -13,6 +13,7 @@
         <url>http://www.orbisgis.org</url>
         <modules>
                 <module>tview</module>
+                <module>tinterface</module>
         </modules>
         <properties>
                 <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

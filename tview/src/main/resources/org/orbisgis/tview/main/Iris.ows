@@ -11,7 +11,7 @@
     <ns3:Layer hidden="false">
       <ns1:Title xml:lang="fr-FR">iris_nantes2008</ns1:Title>
       <ns3:DataURL>
-	<ns3:OnlineResource ns2:href="file:/home/data/iris_nantes2008.shp" ns2:type="simple"/>
+	<ns3:OnlineResource ns2:href="file:/Users/data/iris_nantes2008/iris_nantes2008.shp" ns2:type="simple"/>
       </ns3:DataURL>
       <ns3:StyleList>
 	<ns3:Style>
