@@ -62,7 +62,7 @@ public class MainScene extends AbstractScene {
                 // configuration file) and add it to the scene
                 try {
                         //If encountered a heap of memory exception, set a lower buffer size
-                        this.map = new Map(mtApplication, this, 1,mapFile);
+                        this.map = new Map(mtApplication, this, 2,mapFile);
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
