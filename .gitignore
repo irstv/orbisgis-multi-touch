@@ -1,14 +1,16 @@
 target/
-
+.gitignore~
 .DS_Store
-
+.directory
 Settings.txt
 .classpath
 .project
 .settings
 *.ows
+*.idea
+*.iml
 bin/
-
+nbactions.xml
 *.dll
 
 tinterface/ManyMouse.dll
@@ -24,3 +26,4 @@ tinterface/Readme.txt
 tinterface/License.txt
 
 tinterface/whirlycache-default.xml
+/nbactions.xml

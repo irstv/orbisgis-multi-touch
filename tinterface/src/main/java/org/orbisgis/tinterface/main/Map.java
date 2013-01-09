@@ -8,6 +8,8 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.io.WKTWriter;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import org.gdms.data.DataSource;
 import org.gdms.data.DataSourceCreationException;
@@ -37,7 +39,7 @@ import processing.core.PImage;
  *
  */
 public class Map extends MTRectangle {
-
+        private MainContext mainContext;
         private final OrbisGISMap frame;
         private final MapContext mapContext;
         /**
@@ -49,11 +51,11 @@ public class Map extends MTRectangle {
          */
         private float buffersize;
 
-        public Map(MTApplication mtApplication, MainScene mainScene, float buffersize)
+        public Map(MTApplication mtApplication, MainScene mainScene, float buffersize, File mapPath)
                 throws Exception {
         		//Create the rectangle (that will contain the map)
                 super(mtApplication, mtApplication.width * buffersize, mtApplication.height * buffersize);
-                
+
                 //Delete the white borders of the rectangle
                 this.setNoStroke(true);
                 //Place the rectangle in the middle of the screen
@@ -70,10 +72,12 @@ public class Map extends MTRectangle {
                 CoreWorkspace workspace = new CoreWorkspace();
                 File workspaceFolder = new File(System.getProperty("user.home"),
                         "OrbisGIS_MT" + File.separator);
+                File applicationFolder = new File(workspaceFolder,"app");
                 workspace.setWorkspaceFolder(workspaceFolder.getAbsolutePath());
-                MainContext mainContext = new MainContext(true, workspace, true);
+                workspace.setApplicationFolder(applicationFolder.getAbsolutePath());
+                mainContext = new MainContext(true, workspace, true);
                 frame = new OrbisGISMap();
-                mapContext = loadMapContext();
+                mapContext = readMapContext(mapPath);
                 frame.init(mapContext, (int) (mtApplication.width * buffersize), (int) (mtApplication.height * buffersize));
                 Envelope extent = frame.getMapTransform().getExtent();
                 double facteur = (buffersize - 1) / 2;
@@ -88,7 +92,7 @@ public class Map extends MTRectangle {
                 BufferedImage im = frame.getMapTransform().getImage();
                 PImage image = new PImage(im);
                 this.setTexture(image);
-                
+
                 //Add the rectangle to the main scene
                 mainScene.getCanvas().addChild(this);
         }
@@ -115,7 +119,7 @@ public class Map extends MTRectangle {
                 frame.getMapTransform().setExtent(
                         new Envelope(extent.getMinX() - dx, extent.getMaxX() - dx,
                         extent.getMinY() + dy, extent.getMaxY() + dy));
-                
+
                 //Draw the new image
                 frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
                 mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());
@@ -132,12 +136,15 @@ public class Map extends MTRectangle {
          * @throws IllegalStateException
          * @throws LayerException
          */
-        private static MapContext loadMapContext()
-                throws IllegalStateException, LayerException {
+        private static MapContext readMapContext(File path) throws IOException {
                 MapContext mapContext = new OwsMapContext();
-                InputStream fileContent = Map.class.getResourceAsStream("Layers.ows");
+                InputStream fileContent = new FileInputStream(path);
                 mapContext.read(fileContent);
-                mapContext.open(null);
+                try {
+                    mapContext.open(null);
+                } catch (LayerException ex) {
+                    throw new IOException(ex);
+                }
                 return mapContext;
         }
 
@@ -333,7 +340,7 @@ public class Map extends MTRectangle {
                                 visible = layer.isVisible();
                         }
                 }
-                
+
                 //Draw the new image in the rectangle
                 frame.getMapTransform().setImage(new BufferedImage(frame.getMapTransform().getWidth(), frame.getMapTransform().getHeight(), BufferedImage.TYPE_INT_ARGB));
                 mapContext.draw(frame.getMapTransform(), new NullProgressMonitor());

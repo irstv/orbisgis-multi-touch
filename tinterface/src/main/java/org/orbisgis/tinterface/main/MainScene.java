@@ -1,5 +1,6 @@
 package org.orbisgis.tinterface.main;
 
+import java.io.File;
 import org.mt4j.MTApplication;
 import org.mt4j.components.MTComponent;
 import org.mt4j.input.gestureAction.TapAndHoldVisualizer;
@@ -47,13 +48,13 @@ public class MainScene extends AbstractScene {
          * @param mtApplication the application
          * @param name the name of the scene
          */
-        public MainScene(MTApplication mtApplication, String name) {
+        public MainScene(MTApplication mtApplication, String name, File mapFile) {
                 super(mtApplication, name);
 
                 //Initialize parameters
                 this.mtApplication = mtApplication;
                 vect = new Vector3D(0, 0);
-                
+
                 // Add a circle around every point that is touched
                 // this.registerGlobalInputProcessor(new CursorTracer(mtApplication, this));
 
@@ -61,7 +62,7 @@ public class MainScene extends AbstractScene {
                 // configuration file) and add it to the scene
                 try {
                         //If encountered a heap of memory exception, set a lower buffer size
-                        this.map = new Map(mtApplication, this, 2);
+                        this.map = new Map(mtApplication, this, 2,mapFile);
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
@@ -114,10 +115,10 @@ public class MainScene extends AbstractScene {
                         // Get the translation vector and memorize the sum
                         Vector3D tVect = ((DragEvent) gesture).getTranslationVect();
                         vect = vect.addLocal(tVect);
-                        
+
                         //Translate the rectangle containing the map
                         map.translateGlobal(tVect);
-                        
+
                         //Draw a new map at the end of the gesture
                         if (gesture.getId() == MTGestureEvent.GESTURE_ENDED) {
                                 // Move the map
@@ -129,7 +130,7 @@ public class MainScene extends AbstractScene {
                                 for (i = 0; i < children.length; i++) {
                                         children[i].translate(vect);
                                 }
-                                
+
                                 //Put the rectangle in the middle of the screen
                                 map.setPositionGlobal(new Vector3D(mtApplication.width / 2, mtApplication.height / 2));
                                 vect.setX(0);
@@ -157,17 +158,17 @@ public class MainScene extends AbstractScene {
                         if (gesture.getId() == MTGestureEvent.GESTURE_STARTED) {
                                 map.removeAllChildren();
                         }
-                        
+
                         // First, the rectangle is scaled during the gesture
                         map.scaleGlobal(((ScaleEvent) gesture).getScaleFactorX(), ((ScaleEvent) gesture).getScaleFactorY(), ((ScaleEvent) gesture).getScaleFactorZ(), ((ScaleEvent) gesture).getScalingPoint());
-                        
+
                         // At the end of the gesture, we calculate the new envelope, reset the rectangle and retexture it
                         if (gesture.getId() == MTGestureEvent.GESTURE_ENDED) {
                                 float scaleFactor = mtApplication.width*map.getBuffersize() / map.getWidth();
                                 float width = map.getWidth();
                                 float height = map.getHeight();
                                 Vector3D centerPos = new Vector3D(map.getCenterPointGlobal());
-                                
+
                                 map.setHeightXYGlobal(mtApplication.height * map.getBuffersize());
                                 map.setWidthXYGlobal(mtApplication.width * map.getBuffersize());
                                 map.setPositionGlobal(new Vector3D(mtApplication.width / 2, mtApplication.height / 2));
